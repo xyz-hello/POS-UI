@@ -1,8 +1,9 @@
+// pages/Login.jsx
 import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
-function Login({ setIsLoggedIn }) {
+export default function Login({ setIsLoggedIn }) {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -19,54 +20,69 @@ function Login({ setIsLoggedIn }) {
       });
 
       if (response.data.success) {
+        const role = response.data.role;
+
+        // Save login state and role in localStorage for persistence
         localStorage.setItem('isLoggedIn', 'true');
-        setIsLoggedIn(true);
-        navigate('/dashboard');
+        localStorage.setItem('role', role);
+
+        setIsLoggedIn(true); // Update React state
+
+        // Redirect user to dashboard based on role
+        if (role === 'superadmin') {
+          navigate('/superadmin/dashboard');
+        } else if (role === 'admin') {
+          navigate('/admin/dashboard');
+        } else {
+          setError('Unknown role');
+        }
       } else {
         setError('Invalid username or password');
       }
     } catch (err) {
-      console.error(err);
-      setError('Something went wrong. Try again.');
+      setError('Invalid Credentials.');
     }
   };
 
   return (
-    <div className="min-h-screen bg-[#012E40] flex items-center justify-center px-4">
-      <div className="bg-white/10 backdrop-blur-lg border border-white/20 rounded-2xl shadow-2xl p-8 w-full max-w-md">
-        <h2 className="text-3xl font-bold text-[#F2E3D5] text-center mb-6">Login</h2>
+    <div className="min-h-screen flex">
+      {/* Left panel */}
+      <div className="hidden md:flex w-1/2 bg-indigo-700 text-indigo-100 flex-col justify-center items-center p-12">
+        <h1 className="text-4xl font-extrabold mb-4">Welcome Back!</h1>
+        <p className="text-lg max-w-md text-center">
+          Insightful analytics and effortless client management at your fingertips.
+        </p>
+      </div>
 
-        <form onSubmit={handleLogin} className="space-y-4">
+      {/* Right panel */}
+      <div className="flex flex-col w-full md:w-1/2 justify-center items-center bg-white p-8">
+        <h2 className="text-3xl font-bold text-indigo-700 mb-8">Login to your account</h2>
+        <form onSubmit={handleLogin} className="w-full max-w-sm space-y-6">
           <input
             type="text"
             placeholder="Username"
-            className="w-full px-4 py-2 rounded-lg bg-white/80 placeholder-gray-600 text-[#012E40] border border-[#3CA6A6] focus:ring-2 focus:ring-[#026773] focus:outline-none"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
+            className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
             required
           />
-
           <input
             type="password"
             placeholder="Password"
-            className="w-full px-4 py-2 rounded-lg bg-white/80 placeholder-gray-600 text-[#012E40] border border-[#3CA6A6] focus:ring-2 focus:ring-[#026773] focus:outline-none"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+            className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
             required
           />
-
           <button
             type="submit"
-            className="w-full py-2 bg-[#026773] hover:bg-[#024959] text-white rounded-lg font-semibold transition"
+            className="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-md font-semibold transition"
           >
             Log In
           </button>
+          {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
         </form>
-
-        {error && <p className="text-red-400 text-sm text-center mt-4">{error}</p>}
       </div>
     </div>
   );
 }
-
-export default Login;
