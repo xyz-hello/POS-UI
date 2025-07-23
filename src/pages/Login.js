@@ -1,4 +1,3 @@
-// pages/Login.jsx
 import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
@@ -14,24 +13,25 @@ export default function Login({ setIsLoggedIn }) {
     setError('');
 
     try {
-      const response = await axios.post('http://localhost:3000/api/login', {
+      const response = await axios.post('http://localhost:4000/api/auth/login', {
         username,
         password,
       });
 
-      if (response.data.success) {
-        const role = response.data.role;
+      const { token, user } = response.data;
 
-        // Save login state and role in localStorage for persistence
+      if (token && user) {
+        // Save token and user info
+        localStorage.setItem('token', token);
         localStorage.setItem('isLoggedIn', 'true');
-        localStorage.setItem('role', role);
+        localStorage.setItem('role', user.user_type === 0 ? 'superadmin' : 'admin');
 
-        setIsLoggedIn(true); // Update React state
+        setIsLoggedIn(true);
 
-        // Redirect user to dashboard based on role
-        if (role === 'superadmin') {
+        // Redirect based on role
+        if (user.user_type === 0) {
           navigate('/superadmin/dashboard');
-        } else if (role === 'admin') {
+        } else if (user.user_type === 1) {
           navigate('/admin/dashboard');
         } else {
           setError('Unknown role');
