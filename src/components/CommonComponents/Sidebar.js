@@ -30,17 +30,17 @@ export default function Sidebar({ role = 'superadmin' }) {
   return (
     <>
       {/* Mobile hamburger toggle */}
-      <div className="md:hidden flex items-center justify-between p-4 bg-indigo-700 text-white shadow-md">
-        <div className="font-bold text-xl">{roleTitle} Panel</div>
+      <div className="md:hidden flex items-center justify-between px-4 py-3 bg-indigo-700 text-white shadow-md">
+        <div className="text-lg font-semibold tracking-wide">{roleTitle} Panel</div>
         <button
           onClick={() => setIsOpen(!isOpen)}
           className="focus:outline-none"
           aria-label="Toggle sidebar"
         >
           {isOpen ? (
-            <XMarkIcon className="h-8 w-8" />
+            <XMarkIcon className="h-7 w-7" />
           ) : (
-            <Bars3Icon className="h-8 w-8" />
+            <Bars3Icon className="h-7 w-7" />
           )}
         </button>
       </div>
@@ -48,7 +48,7 @@ export default function Sidebar({ role = 'superadmin' }) {
       {/* Sidebar */}
       <aside
         className={`
-          fixed top-0 left-0 h-full bg-indigo-900 text-indigo-100 shadow-xl
+          fixed top-0 left-0 h-full bg-indigo-900 text-white shadow-xl
           md:static md:translate-x-0 transform
           transition-transform duration-300 ease-in-out
           ${isOpen ? 'translate-x-0 w-64' : '-translate-x-full w-64'}
@@ -58,8 +58,10 @@ export default function Sidebar({ role = 'superadmin' }) {
         `}
       >
         {/* Logo / Title */}
-        <div className="hidden md:flex items-center justify-center h-20 border-b border-indigo-800 font-extrabold text-2xl tracking-wide">
-          {roleTitle} Panel
+        <div className="hidden md:flex items-center justify-center h-20 border-b border-indigo-800">
+          <span className="text-xl font-bold tracking-wide text-white">
+            {roleTitle} Panel
+          </span>
         </div>
 
         {/* Navigation Menu */}
@@ -70,21 +72,22 @@ export default function Sidebar({ role = 'superadmin' }) {
               to={to}
               className={({ isActive }) =>
                 `
-                flex items-center gap-3 px-4 py-3 rounded-md transition 
-                hover:bg-indigo-700 hover:text-white
-                ${isActive ? 'bg-indigo-700 shadow-lg font-semibold text-white' : 'text-indigo-300'}
+                  flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200
+                  ${isActive
+                  ? 'bg-indigo-700 text-white shadow-sm font-medium'
+                  : 'text-indigo-300 hover:bg-indigo-800 hover:text-white hover:shadow'}
                 `
               }
-              onClick={() => setIsOpen(false)} // Close menu on mobile when clicked
+              onClick={() => setIsOpen(false)}
             >
-              <Icon className="h-6 w-6" />
-              <span className="text-md">{name}</span>
+              <Icon className="h-5 w-5" />
+              <span className="text-sm">{name}</span>
             </NavLink>
           ))}
         </nav>
 
         {/* Optional footer or user info */}
-        <div className="border-t border-indigo-800 p-4 text-indigo-400 text-sm">
+        <div className="border-t border-indigo-800 p-4 text-indigo-400 text-xs text-center">
           &copy; 2025 Zero One
         </div>
       </aside>
