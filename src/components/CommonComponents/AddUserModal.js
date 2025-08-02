@@ -7,13 +7,11 @@ import {
 } from '../../utils/toast';
 
 const AddUserModal = ({ editData, onClose, onUserAddedOrUpdated }) => {
-  // 👉 Local form state
   const [name, setName] = useState('');
   const [systemType, setSystemType] = useState('');
   const [status, setStatus] = useState('ACTIVE');
-  const [isSubmitting, setIsSubmitting] = useState(false); // 👉 Disable button while submitting
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // 👉 Pre-fill form when in edit mode, or reset for new user
   useEffect(() => {
     if (editData) {
       setName(editData.name ?? '');
@@ -26,7 +24,6 @@ const AddUserModal = ({ editData, onClose, onUserAddedOrUpdated }) => {
     }
   }, [editData]);
 
-  // 👉 Form submit: Add or Update customer
   const handleSubmit = async () => {
     if (!name || !systemType || !status) {
       showWarnToast('Please fill out all fields.');
@@ -56,7 +53,7 @@ const AddUserModal = ({ editData, onClose, onUserAddedOrUpdated }) => {
       });
 
       showSuccessToast(editData ? 'Customer updated successfully!' : 'Customer added successfully!');
-      onUserAddedOrUpdated(); // 👉 refresh list in parent
+      onUserAddedOrUpdated();
     } catch (error) {
       console.error('Error saving customer:', error);
       showErrorToast('Something went wrong while saving the customer.');
@@ -66,32 +63,33 @@ const AddUserModal = ({ editData, onClose, onUserAddedOrUpdated }) => {
   };
 
   return (
-    // 👉 Modal container
-    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40 z-50">
-      <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
-        <h2 className="text-xl font-semibold mb-4">
+    <div className="fixed inset-0 z-50 bg-black/30 backdrop-blur-sm flex items-center justify-center px-4">
+      <div className="bg-white rounded-2xl p-6 shadow-xl max-w-md w-full">
+
+        {/* Modal title */}
+        <h2 className="text-xl font-semibold text-[#0f1e40] mb-6">
           {editData ? 'Edit Customer' : 'Add Customer'}
         </h2>
 
-        {/* 👉 Customer name input */}
+        {/* Customer name input */}
         <div className="mb-4">
-          <label className="block text-sm font-medium text-gray-700">Customer Name</label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Customer Name</label>
           <input
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="mt-1 p-2 w-full border border-gray-300 rounded-md"
+            className="w-full px-4 py-2 border border-[#0f1e40] bg-white text-[#0f1e40] rounded-md focus:ring-2 focus:ring-[#0f1e40] focus:outline-none"
             placeholder="Enter customer name"
           />
         </div>
 
-        {/* 👉 System Type dropdown */}
+        {/* System Type dropdown */}
         <div className="mb-4">
-          <label className="block text-sm font-medium text-gray-700">System Type</label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">System Type</label>
           <select
             value={systemType}
             onChange={(e) => setSystemType(e.target.value)}
-            className="mt-1 p-2 w-full border border-gray-300 rounded-md"
+            className="w-full px-4 py-2 border border-[#0f1e40] bg-white text-[#0f1e40] rounded-md focus:ring-2 focus:ring-[#0f1e40] focus:outline-none"
           >
             <option value="">Select system type</option>
             <option value="Banking">Banking</option>
@@ -101,33 +99,35 @@ const AddUserModal = ({ editData, onClose, onUserAddedOrUpdated }) => {
           </select>
         </div>
 
-        {/* 👉 Status dropdown */}
-        <div className="mb-4">
-          <label className="block text-sm font-medium text-gray-700">Status</label>
+        {/* Status dropdown */}
+        <div className="mb-6">
+          <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
           <select
             value={status}
             onChange={(e) => setStatus(e.target.value)}
-            className="mt-1 p-2 w-full border border-gray-300 rounded-md"
+            className="w-full px-4 py-2 border border-[#0f1e40] bg-white text-[#0f1e40] rounded-md focus:ring-2 focus:ring-[#0f1e40] focus:outline-none"
           >
             <option value="ACTIVE">ACTIVE</option>
             <option value="INACTIVE">INACTIVE</option>
           </select>
         </div>
 
-        {/* 👉 Modal action buttons */}
-        <div className="flex justify-end">
+
+
+        {/* Action buttons */}
+        <div className="flex justify-center gap-4 mt-2">
           <button
             onClick={onClose}
-            className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-2 px-4 rounded mr-2"
+            className="w-[100px] h-[38px] border border-[#0f1e40] bg-white text-[#0f1e40] rounded-md text-sm font-medium focus:ring-2 focus:ring-[#0f1e40] focus:outline-none transition duration-150"
             disabled={isSubmitting}
           >
             Cancel
           </button>
           <button
             onClick={handleSubmit}
-            className={`font-semibold py-2 px-4 rounded text-white ${isSubmitting
-                ? 'bg-indigo-400 cursor-not-allowed'
-                : 'bg-indigo-700 hover:bg-indigo-800'
+            className={`w-[100px] h-[38px] rounded-md text-sm font-medium text-white transition ${isSubmitting
+              ? 'bg-gray-400 cursor-not-allowed'
+              : 'bg-[#081A4B] hover:bg-[#061533]'
               }`}
             disabled={isSubmitting}
           >

@@ -2,6 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import Sidebar from '../components/CommonComponents/Sidebar';
 import Header from '../components/CommonComponents/Header';
 
+
 export default function AdminDashboard() {
   const navigate = useNavigate();
 

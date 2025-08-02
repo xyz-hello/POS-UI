@@ -7,6 +7,7 @@ import AddUserModal from '../components/CommonComponents/AddUserModal'; //import
 import axios from 'axios';
 import { showSuccessToast, showErrorToast } from '../utils/toast'; //reusable toast
 
+
 export default function SuperAdminDashboard() {
   const navigate = useNavigate();
 
