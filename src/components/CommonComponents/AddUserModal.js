@@ -9,26 +9,24 @@ import {
 const AddUserModal = ({ editData, onClose, onUserAddedOrUpdated }) => {
   const [name, setName] = useState('');
   const [systemType, setSystemType] = useState('');
-  const [status, setStatus] = useState('ACTIVE');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     if (editData) {
       setName(editData.name ?? '');
       setSystemType(editData.system_type ?? '');
-      setStatus(editData.status ?? 'ACTIVE');
     } else {
       setName('');
       setSystemType('');
-      setStatus('ACTIVE');
     }
   }, [editData]);
 
   const handleSubmit = async () => {
-    if (!name || !systemType || !status) {
+    if (!name || !systemType) {
       showWarnToast('Please fill out all fields.');
       return;
     }
+
 
     setIsSubmitting(true);
 
@@ -45,7 +43,7 @@ const AddUserModal = ({ editData, onClose, onUserAddedOrUpdated }) => {
         data: {
           name,
           system_type: systemType,
-          status,
+          status: 'ACTIVE',
         },
         headers: {
           Authorization: `Bearer ${token}`,
@@ -98,21 +96,6 @@ const AddUserModal = ({ editData, onClose, onUserAddedOrUpdated }) => {
             <option value="Point of Sales">Point of Sales</option>
           </select>
         </div>
-
-        {/* Status dropdown */}
-        <div className="mb-6">
-          <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
-          <select
-            value={status}
-            onChange={(e) => setStatus(e.target.value)}
-            className="w-full px-4 py-2 border border-[#0f1e40] bg-white text-[#0f1e40] rounded-md focus:ring-2 focus:ring-[#0f1e40] focus:outline-none"
-          >
-            <option value="ACTIVE">ACTIVE</option>
-            <option value="INACTIVE">INACTIVE</option>
-          </select>
-        </div>
-
-
 
         {/* Action buttons */}
         <div className="flex justify-center gap-4 mt-2">
