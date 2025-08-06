@@ -1,69 +1,50 @@
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-// Pages
 import Login from './pages/Login';
 import SuperAdminDashboard from './superadmin/Dashboard';
 import AdminDashboard from './admin/Dashboard';
+import ProtectedRoute from './components/ProtectedRoute';
 
 function App() {
-  // Login state initialized from localStorage
-  const [isLoggedIn, setIsLoggedIn] = useState(() => {
+  const [, setIsLoggedIn] = useState(() => {
     return localStorage.getItem('isLoggedIn') === 'true';
   });
 
-  // Keep syncing localStorage changes to state (in case user refreshes)
   useEffect(() => {
-    const checkLoginStatus = () => {
-      const loginStatus = localStorage.getItem('isLoggedIn') === 'true';
-      setIsLoggedIn(loginStatus);
+    const handleStorageChange = () => {
+      const status = localStorage.getItem('isLoggedIn') === 'true';
+      setIsLoggedIn(status);
     };
 
-    checkLoginStatus();
-
-    // Optional: Listen for localStorage changes (multi-tab support)
-    window.addEventListener('storage', checkLoginStatus);
-
-    return () => window.removeEventListener('storage', checkLoginStatus);
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
   }, []);
 
   return (
     <Router>
       <Routes>
-        {/* Redirect root to /login */}
-        <Route path="/" element={<Navigate to="/login" />} />
-
-        {/* Login route */}
-        <Route path="/login" element={<Login setIsLoggedIn={setIsLoggedIn} />} />
-
-        {/* SuperAdmin Dashboard route (protected) */}
+        <Route path="/" element={<Login setIsLoggedIn={setIsLoggedIn} />} />
         <Route
           path="/superadmin/dashboard"
           element={
-            isLoggedIn ? (
+            <ProtectedRoute>
               <SuperAdminDashboard setIsLoggedIn={setIsLoggedIn} />
-            ) : (
-              <Navigate to="/login" />
-            )
+            </ProtectedRoute>
           }
         />
-
-        {/* Admin Dashboard route (protected) */}
         <Route
           path="/admin/dashboard"
           element={
-            isLoggedIn ? (
+            <ProtectedRoute>
               <AdminDashboard setIsLoggedIn={setIsLoggedIn} />
-            ) : (
-              <Navigate to="/login" />
-            )
+            </ProtectedRoute>
           }
         />
       </Routes>
 
-      {/* ✅ Toast notifications */}
       <ToastContainer position="bottom-right" autoClose={3000} />
     </Router>
   );

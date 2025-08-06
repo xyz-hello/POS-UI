@@ -19,11 +19,11 @@ export default function SuperAdminDashboard() {
 
   // logout and reset session
   const handleLogout = () => {
-    localStorage.removeItem('isLoggedIn');
-    localStorage.removeItem('role');
-    navigate('/');
-    window.location.reload();
+    localStorage.removeItem('token'); // remove token instead of isLoggedIn/role
+    navigate('/login');
+    window.location.reload(); // optional: force reset
   };
+
 
   // when edit button is clicked (set selected customer)
   const handleEdit = (customer) => {

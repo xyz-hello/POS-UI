@@ -19,9 +19,12 @@ export default function Header() {
 
   const handleLogout = () => {
     localStorage.removeItem('token');
-    setShowLogoutModal(false);
-    navigate('/login');
+    localStorage.removeItem('isLoggedIn');
+    localStorage.removeItem('user');
+    navigate('/');
   };
+
+
 
   // Close dropdown on outside click
   useEffect(() => {
