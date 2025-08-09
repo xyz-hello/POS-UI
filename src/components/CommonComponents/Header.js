@@ -12,11 +12,20 @@ export default function Header() {
   const navigate = useNavigate();
   const dropdownRef = useRef();
 
+  // Get user from localStorage
   const user = JSON.parse(localStorage.getItem('user'));
-  const role = user?.role || 'superadmin'; // Default to superadmin
-  // Display-friendly role label
-  const fullName = role === 'superadmin' ? 'Super Admin' : 'Admin';
 
+  // Map numeric user_type to role label
+  const roleLabels = {
+    0: 'Super Admin',
+    1: 'Admin',
+    2: 'Cashier',
+  };
+
+  // Determine displayed role
+  const fullName = roleLabels[user?.user_type] || 'Unknown Role';
+
+  // Logout handler
   const handleLogout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('isLoggedIn');
@@ -24,9 +33,7 @@ export default function Header() {
     navigate('/');
   };
 
-
-
-  // Close dropdown on outside click
+  // Close dropdown when clicking outside
   useEffect(() => {
     function handleClickOutside(event) {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -55,7 +62,6 @@ export default function Header() {
               alt="Avatar"
               className="w-8 h-8 rounded-full"
             />
-
 
             {/* Role Name */}
             <span className="text-sm font-medium text-gray-800">

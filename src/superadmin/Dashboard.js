@@ -3,10 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import Sidebar from '../components/CommonComponents/Sidebar';
 import Header from '../components/CommonComponents/Header';
 import CustomerTable from './CustomerTable';
-import AddUserModal from '../components/CommonComponents/AddUserModal'; //import modal
+import AddCustomerModal from '../components/CommonComponents/AddCustomerModal'; // import modal
 import axios from 'axios';
-import { showSuccessToast, showErrorToast } from '../utils/toast'; //reusable toast
-
+import { showSuccessToast, showErrorToast } from '../utils/toast'; // reusable toast
 
 export default function SuperAdminDashboard() {
   const navigate = useNavigate();
@@ -23,7 +22,6 @@ export default function SuperAdminDashboard() {
     navigate('/login');
     window.location.reload(); // optional: force reset
   };
-
 
   // when edit button is clicked (set selected customer)
   const handleEdit = (customer) => {
@@ -76,9 +74,9 @@ export default function SuperAdminDashboard() {
         </main>
       </div>
 
-      {/* render AddUserModal only if editData is set */}
+      {/* render AddCustomerModal only if editData is set */}
       {editData && (
-        <AddUserModal
+        <AddCustomerModal
           editData={editData}
           onClose={handleCloseModal}
           onUserAddedOrUpdated={handleUserAddedOrUpdated}

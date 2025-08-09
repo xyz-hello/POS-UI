@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import AddUserModal from '../components/CommonComponents/AddUserModal';
+import AddCustomerModal from '../components/CommonComponents/AddCustomerModal';
 import { MdEdit, MdDelete, MdToggleOn, MdToggleOff } from 'react-icons/md';
 import DeleteModal from '../components/CommonComponents/ConfirmationModal';
 import { showSuccessToast, showErrorToast } from '../utils/toast';
@@ -298,14 +298,14 @@ const CustomerList = () => {
         </button>
       </div>
 
-      {/* Add/Edit Modal */}
       {showModal && (
-        <AddUserModal
+        <AddCustomerModal
           editData={selectedCustomer}
           onClose={handleCloseModal}
           onUserAddedOrUpdated={handleUserAddedOrUpdated}
         />
       )}
+
 
       {/* Delete Confirmation Modal */}
       <DeleteModal

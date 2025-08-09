@@ -1,22 +1,27 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:4000/api/superadmin/customers';
+// Base API URL for admin users
+const API_URL = 'http://localhost:4000/api/admin/users';
 
+// Retrieve stored JWT token
 const getToken = () => localStorage.getItem('token');
 
-export const fetchCustomers = async () => {
+// Get all users
+export const fetchUsers = async () => {
   return axios.get(API_URL, {
     headers: { Authorization: `Bearer ${getToken()}` },
   });
 };
 
-export const deleteCustomer = async (id) => {
+// Delete a specific user
+export const deleteUser = async (id) => {
   return axios.delete(`${API_URL}/${id}`, {
     headers: { Authorization: `Bearer ${getToken()}` },
   });
 };
 
-export const updateCustomer = async (id, data) => {
+// Update a specific user
+export const updateUser = async (id, data) => {
   return axios.put(`${API_URL}/${id}`, data, {
     headers: { Authorization: `Bearer ${getToken()}` },
   });
