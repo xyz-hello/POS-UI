@@ -24,15 +24,31 @@ export default function Login({ setIsLoggedIn }) {
       const { token, user } = response.data;
 
       if (token && user) {
+        // Save token and login status
         localStorage.setItem('token', token);
         localStorage.setItem('isLoggedIn', 'true');
+
+        // Normalize and save role as lowercase string for consistent role checks
+        // Assuming user.user_type: 0 = superadmin, 1 = admin, 2 = cashier
+        let role = '';
+        if (user.user_type === 0) role = 'superadmin';
+        else if (user.user_type === 1) role = 'admin';
+        else if (user.user_type === 2) role = 'cashier';
+        else {
+          setError('Unknown role');
+          return;
+        }
+        localStorage.setItem('role', role);
+
+        // Save full user info as JSON string for other parts of app if needed
         localStorage.setItem('user', JSON.stringify(user));
+
         setIsLoggedIn(true);
 
-        if (user.user_type === 0) navigate('/superadmin/dashboard');
-        else if (user.user_type === 1) navigate('/admin/dashboard');
-        else if (user.user_type === 2) navigate('/cashier/dashboard');
-        else setError('Unknown role');
+        // Redirect to dashboard by role
+        if (role === 'superadmin') navigate('/superadmin/dashboard');
+        else if (role === 'admin') navigate('/admin/dashboard');
+        else if (role === 'cashier') navigate('/cashier/dashboard');
       } else {
         setError('Invalid credentials');
       }
@@ -53,24 +69,19 @@ export default function Login({ setIsLoggedIn }) {
             Manage clients, users, and operations — all in one unified dashboard.
           </p>
         </div>
-      </div >
+      </div>
 
       {/* Right panel: light gray background, center the card */}
-      < div className="flex flex-col w-full md:w-1/2 bg-gray-50 justify-center items-center p-8" >
-        {/* Card container wrapping all login content */}
+      <div className="flex flex-col w-full md:w-1/2 bg-gray-50 justify-center items-center p-8">
         <div className="bg-white p-8 rounded-xl shadow-lg w-full max-w-md flex flex-col items-center">
-          {/* Logo */}
           <img
             src={logo}
             alt="Logo"
             className="w-48 h-auto max-h-40 mb-6 object-scale-down"
           />
-          {/* texts */}
           <h1 className="text-3xl font-semibold text-[#081A4B] mb-6">Log into your Account</h1>
 
-          {/* Single login form */}
           <form onSubmit={handleLogin} className="space-y-4">
-            {/* Username input with icon */}
             <div className="relative">
               <FaUser className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
               <input
@@ -84,7 +95,6 @@ export default function Login({ setIsLoggedIn }) {
               />
             </div>
 
-            {/* Password input with icon and toggle */}
             <div className="relative">
               <FaLock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
               <input
@@ -107,7 +117,6 @@ export default function Login({ setIsLoggedIn }) {
               </button>
             </div>
 
-            {/* Submit button */}
             <button
               type="submit"
               className="w-full bg-[#081A4B] text-white font-semibold py-2.5 rounded-md hover:bg-[#061533] transition"
@@ -115,19 +124,17 @@ export default function Login({ setIsLoggedIn }) {
               Log In
             </button>
 
-            {/* Error message */}
             {error && <p className="text-red-600 text-center mt-2 text-sm">{error}</p>}
           </form>
 
-          {/* “Your Account” container below the form */}
           <div className="mt-8 p-6 border border-gray-200 rounded-md shadow-sm bg-[#f9fafb]">
             <h2 className="text-lg font-semibold text-[#081A4B] mb-2">Your Account</h2>
             <p className="text-gray-700 text-sm leading-relaxed">
               Manage your settings and preferences. Contact your admin if you don’t have access.
             </p>
           </div>
-        </div >
-      </div >
-    </div >
+        </div>
+      </div>
+    </div>
   );
 }

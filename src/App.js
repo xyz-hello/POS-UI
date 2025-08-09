@@ -9,9 +9,8 @@ import AdminDashboard from './admin/Dashboard';
 import ProtectedRoute from './components/ProtectedRoute';
 
 function App() {
-  const [, setIsLoggedIn] = useState(() => {
-    return localStorage.getItem('isLoggedIn') === 'true';
-  });
+  // Initialize login state from localStorage once
+  const [, setIsLoggedIn] = useState(() => localStorage.getItem('isLoggedIn') === 'true');
 
   useEffect(() => {
     const handleStorageChange = () => {
@@ -26,25 +25,30 @@ function App() {
   return (
     <Router>
       <Routes>
+        {/* Public login route */}
         <Route path="/" element={<Login setIsLoggedIn={setIsLoggedIn} />} />
+
+        {/* Protected routes with role-based access */}
         <Route
           path="/superadmin/dashboard"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute allowedRoles={['superadmin']}>
               <SuperAdminDashboard setIsLoggedIn={setIsLoggedIn} />
             </ProtectedRoute>
           }
         />
+
         <Route
           path="/admin/dashboard"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute allowedRoles={['admin']}>
               <AdminDashboard setIsLoggedIn={setIsLoggedIn} />
             </ProtectedRoute>
           }
         />
       </Routes>
 
+      {/* Toast notifications container */}
       <ToastContainer position="bottom-right" autoClose={3000} />
     </Router>
   );

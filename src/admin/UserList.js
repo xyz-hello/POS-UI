@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { fetchUsers, deleteUser } from '../services/usersApi';
 import DeleteModal from '../components/CommonComponents/ConfirmationModal';
 import AddUserModal from '../components/CommonComponents/AddUserModal';
@@ -17,24 +17,28 @@ const UserList = () => {
     const [selectedUser, setSelectedUser] = useState(null); // For edit modal data
     const [searchTerm, setSearchTerm] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
+    const [loading, setLoading] = useState(false); // Track loading state for API calls
 
     const usersPerPage = 5;
 
-    // Load users once component mounts
-    useEffect(() => {
-        loadUsers();
-    }, []);
-
-    // Fetch user data from API
-    const loadUsers = async () => {
+    // Fetch user data from API - wrapped with useCallback to avoid unnecessary recreation
+    const loadUsers = useCallback(async () => {
+        setLoading(true);
         try {
             const res = await fetchUsers();
             setUsers(res.data.data || []);
         } catch (error) {
             console.error('Error fetching users:', error);
             showErrorToast('Failed to fetch users.');
+        } finally {
+            setLoading(false);
         }
-    };
+    }, []);
+
+    // Load users once component mounts
+    useEffect(() => {
+        loadUsers();
+    }, [loadUsers]);
 
     // Handle user deletion (soft-delete)
     const handleConfirmDelete = async () => {
@@ -73,11 +77,16 @@ const UserList = () => {
         setShowAddEditModal(true);
     };
 
-    // Close Add/Edit modal and reload users
-    const handleCloseAddEditModal = () => {
+    // Close Add/Edit modal without reload
+    const handleCloseModal = () => {
         setSelectedUser(null);
         setShowAddEditModal(false);
+    };
+
+    // Reload users after add or edit and close modal
+    const handleUserAddedOrUpdated = () => {
         loadUsers();
+        handleCloseModal();
     };
 
     // Show confirmation modal before delete
@@ -91,11 +100,18 @@ const UserList = () => {
         user.username.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
+    // Reset current page if filtering results fewer pages
+    useEffect(() => {
+        if (currentPage > Math.ceil(filteredUsers.length / usersPerPage)) {
+            setCurrentPage(1);
+        }
+    }, [filteredUsers, currentPage]);
+
     // Pagination calculations
     const indexOfLastUser = currentPage * usersPerPage;
     const indexOfFirstUser = indexOfLastUser - usersPerPage;
     const currentUsers = filteredUsers.slice(indexOfFirstUser, indexOfLastUser);
-    const totalPages = Math.ceil(filteredUsers.length / usersPerPage) || 1;
+    const totalPages = Math.max(Math.ceil(filteredUsers.length / usersPerPage), 1);
 
     // Pagination handlers
     const handlePreviousPage = () => {
@@ -118,11 +134,13 @@ const UserList = () => {
                         setSearchTerm(e.target.value);
                         setCurrentPage(1);
                     }}
+                    disabled={loading} // Disable while loading to prevent race
                     className="w-full md:max-w-xs px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm focus:outline-none focus:ring-2 focus:ring-[#081A4B] focus:border-[#081A4B]"
                 />
                 <button
                     onClick={handleAddUser}
-                    className="bg-[#081A4B] hover:bg-[#061533] text-white px-6 py-2 rounded-md font-medium shadow-md transition"
+                    disabled={loading} // Disable button during loading
+                    className="bg-[#081A4B] hover:bg-[#061533] text-white px-6 py-2 rounded-md font-medium shadow-md transition disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                     + Add User
                 </button>
@@ -197,8 +215,8 @@ const UserList = () => {
                     onClick={handlePreviousPage}
                     disabled={currentPage === 1}
                     className={`px-2 py-1 rounded-md text-xs font-medium ${currentPage === 1
-                        ? 'bg-[#e5e7eb] text-[#9ca3af] cursor-not-allowed'
-                        : 'bg-[#081A4B] hover:bg-[#061533] text-white'
+                            ? 'bg-[#e5e7eb] text-[#9ca3af] cursor-not-allowed'
+                            : 'bg-[#081A4B] hover:bg-[#061533] text-white'
                         }`}
                 >
                     Prev
@@ -209,8 +227,8 @@ const UserList = () => {
                         key={i + 1}
                         onClick={() => setCurrentPage(i + 1)}
                         className={`px-2 py-1 rounded-md text-xs font-semibold border ${currentPage === i + 1
-                            ? 'bg-[#081A4B] text-white border-[#081A4B]'
-                            : 'bg-white text-[#081A4B] border border-[#081A4B] hover:bg-[#f3f4f6]'
+                                ? 'bg-[#081A4B] text-white border-[#081A4B]'
+                                : 'bg-white text-[#081A4B] border border-[#081A4B] hover:bg-[#f3f4f6]'
                             }`}
                     >
                         {i + 1}
@@ -221,8 +239,8 @@ const UserList = () => {
                     onClick={handleNextPage}
                     disabled={currentPage === totalPages}
                     className={`px-2 py-1 rounded-md text-xs font-medium ${currentPage === totalPages
-                        ? 'bg-[#e5e7eb] text-[#9ca3af] cursor-not-allowed'
-                        : 'bg-[#081A4B] hover:bg-[#061533] text-white'
+                            ? 'bg-[#e5e7eb] text-[#9ca3af] cursor-not-allowed'
+                            : 'bg-[#081A4B] hover:bg-[#061533] text-white'
                         }`}
                 >
                     Next
@@ -233,8 +251,8 @@ const UserList = () => {
             {showAddEditModal && (
                 <AddUserModal
                     editData={selectedUser}
-                    onClose={handleCloseAddEditModal}
-                    onUserAddedOrUpdated={handleCloseAddEditModal}
+                    onClose={handleCloseModal}
+                    onUserAddedOrUpdated={handleUserAddedOrUpdated}
                 />
             )}
 
@@ -244,7 +262,7 @@ const UserList = () => {
                 onClose={() => setShowDeleteModal(false)}
                 onConfirm={handleConfirmDelete}
                 title="Delete User"
-                message={`Are you sure you want to delete "${users.find((u) => u.id === selectedUserId)?.username
+                message={`Are you sure you want to delete "${users.find((u) => u.id === selectedUserId)?.username || 'this user'
                     }"?`}
                 confirmText="Yes"
                 cancelText="No"
