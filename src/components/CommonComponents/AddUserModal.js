@@ -3,21 +3,26 @@ import axios from 'axios';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import { showSuccessToast, showErrorToast, showWarnToast } from '../../utils/toast';
 
-const ROLES = ['Admin', 'Cashier', 'Manager'];
+// Roles must match backend allowed roles (no Admin or SuperAdmin here)
+const ROLES = ['Cashier', 'Manager'];
+
+// Email and password validation regex helpers
 const isValidEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 const isValidPassword = (password) =>
     /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{6,14}$/.test(password);
 
 const AddUserModal = ({ editData, onClose, onUserAddedOrUpdated }) => {
+    // Form states
     const [username, setUsername] = useState('');
-    const [usernameError, setUsernameError] = useState(''); // new error state for username
+    const [usernameError, setUsernameError] = useState('');
     const [email, setEmail] = useState('');
-    const [emailError, setEmailError] = useState(''); // new error state for email
+    const [emailError, setEmailError] = useState('');
     const [role, setRole] = useState('');
     const [password, setPassword] = useState('');
     const [retypePassword, setRetypePassword] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
 
+    // Password visibility toggles
     const [showPassword, setShowPassword] = useState(false);
     const [showRetypePassword, setShowRetypePassword] = useState(false);
 
@@ -25,33 +30,39 @@ const AddUserModal = ({ editData, onClose, onUserAddedOrUpdated }) => {
     const usernameTimeoutRef = useRef(null);
     const emailTimeoutRef = useRef(null);
 
+    // Cleanup debounce timers on unmount
     useEffect(() => {
-        const resetForm = () => {
-            if (editData) {
-                setUsername(editData.username || '');
-                setEmail(editData.email || '');
-                const matchedRole =
-                    ROLES.find((r) => r.toLowerCase() === (editData.role || '').toLowerCase()) || '';
-                setRole(matchedRole);
-                setPassword('');
-                setRetypePassword('');
-                setUsernameError('');
-                setEmailError('');
-            } else {
-                setUsername('');
-                setEmail('');
-                setRole('');
-                setPassword('');
-                setRetypePassword('');
-                setUsernameError('');
-                setEmailError('');
-            }
+        return () => {
+            if (usernameTimeoutRef.current) clearTimeout(usernameTimeoutRef.current);
+            if (emailTimeoutRef.current) clearTimeout(emailTimeoutRef.current);
         };
+    }, []);
 
-        resetForm();
+    // Initialize or reset form fields when editData changes
+    useEffect(() => {
+        if (editData) {
+            setUsername(editData.username || '');
+            setEmail(editData.email || '');
+            // Normalize role case-insensitive
+            const matchedRole =
+                ROLES.find((r) => r.toLowerCase() === (editData.role || '').toLowerCase()) || '';
+            setRole(matchedRole);
+            setPassword('');
+            setRetypePassword('');
+            setUsernameError('');
+            setEmailError('');
+        } else {
+            setUsername('');
+            setEmail('');
+            setRole('');
+            setPassword('');
+            setRetypePassword('');
+            setUsernameError('');
+            setEmailError('');
+        }
     }, [editData]);
 
-    // API call to check username existence
+    // API check if username exists
     const checkUsernameExists = async (usernameToCheck) => {
         const token = localStorage.getItem('token');
         try {
@@ -68,7 +79,7 @@ const AddUserModal = ({ editData, onClose, onUserAddedOrUpdated }) => {
         }
     };
 
-    // API call to check email existence
+    // API check if email exists
     const checkEmailExists = async (emailToCheck) => {
         const token = localStorage.getItem('token');
         try {
@@ -83,59 +94,93 @@ const AddUserModal = ({ editData, onClose, onUserAddedOrUpdated }) => {
         }
     };
 
-    // Live validation for username input with debounce
+    // Debounced username change handler with trimming
     const handleUsernameChange = (value) => {
-        setUsername(value);
+        const trimmed = value.trim();
+        setUsername(trimmed);
         setUsernameError('');
 
         if (usernameTimeoutRef.current) clearTimeout(usernameTimeoutRef.current);
 
-        if (!value.trim()) {
+        if (!trimmed) {
             setUsernameError('Username is required.');
             return;
         }
 
         // Skip API call if editing and username unchanged
-        if (editData && editData.username === value.trim()) return;
+        if (editData && editData.username === trimmed) return;
 
         usernameTimeoutRef.current = setTimeout(async () => {
-            const exists = await checkUsernameExists(value.trim());
-            if (exists) {
-                setUsernameError('Username already exists.');
-            }
+            const exists = await checkUsernameExists(trimmed);
+            if (exists) setUsernameError('Username already exists.');
         }, 500);
     };
 
-    // Live validation for email input with debounce
+    // Debounced email change handler with trimming
     const handleEmailChange = (value) => {
-        setEmail(value);
+        const trimmed = value.trim();
+        setEmail(trimmed);
         setEmailError('');
 
         if (emailTimeoutRef.current) clearTimeout(emailTimeoutRef.current);
 
-        if (!value.trim()) {
+        if (!trimmed) {
             setEmailError('Email is required.');
             return;
         }
-
-        if (!isValidEmail(value.trim())) {
+        if (!isValidEmail(trimmed)) {
             setEmailError('Invalid email address.');
             return;
         }
 
         // Skip API call if editing and email unchanged
-        if (editData && editData.email === value.trim()) return;
+        if (editData && editData.email === trimmed) return;
 
         emailTimeoutRef.current = setTimeout(async () => {
-            const exists = await checkEmailExists(value.trim());
-            if (exists) {
-                setEmailError('Email already exists.');
-            }
+            const exists = await checkEmailExists(trimmed);
+            if (exists) setEmailError('Email already exists.');
         }, 500);
     };
 
+    // Validate password fields (for submit)
+    const validatePasswordFields = () => {
+        if (editData) {
+            // On edit, password optional but if entered must be valid and match
+            if (password) {
+                if (!isValidPassword(password)) {
+                    showWarnToast(
+                        'Password must be 6-14 characters and include uppercase, lowercase, number, and symbol.'
+                    );
+                    return false;
+                }
+                if (password !== retypePassword) {
+                    showWarnToast("Passwords don't match.");
+                    return false;
+                }
+            }
+        } else {
+            // On add, password required and must be valid and match
+            if (!password) {
+                showWarnToast('Please enter a password.');
+                return false;
+            }
+            if (!isValidPassword(password)) {
+                showWarnToast(
+                    'Password must be 6-14 characters and include uppercase, lowercase, number, and symbol.'
+                );
+                return false;
+            }
+            if (password !== retypePassword) {
+                showWarnToast("Passwords don't match.");
+                return false;
+            }
+        }
+        return true;
+    };
+
+    // Submit handler
     const handleSubmit = async () => {
-        if (!username.trim() || !email.trim() || !role.trim()) {
+        if (!username || !email || !role) {
             showWarnToast('Please fill in all the required fields.');
             return;
         }
@@ -145,58 +190,30 @@ const AddUserModal = ({ editData, onClose, onUserAddedOrUpdated }) => {
             return;
         }
 
-        if (!isValidEmail(email.trim())) {
+        if (!isValidEmail(email)) {
             showWarnToast('Invalid email address.');
             return;
         }
 
-        if (editData) {
-            if (password) {
-                if (!isValidPassword(password)) {
-                    showWarnToast(
-                        'Password must be 6-14 characters and include uppercase, lowercase, number, and symbol.'
-                    );
-                    return;
-                }
-                if (password !== retypePassword) {
-                    showWarnToast("Passwords don't match.");
-                    return;
-                }
-            }
-        } else {
-            if (!password) {
-                showWarnToast('Please enter a password.');
-                return;
-            }
-            if (!isValidPassword(password)) {
-                showWarnToast(
-                    'Password must be 6-14 characters and include uppercase, lowercase, number, and symbol.'
-                );
-                return;
-            }
-            if (password !== retypePassword) {
-                showWarnToast("Passwords don't match.");
-                return;
-            }
-        }
+        if (!validatePasswordFields()) return;
 
         setIsSubmitting(true);
 
         try {
-            // For safety, check username existence again before submit (if changed)
+            // Check username uniqueness before submit if changed
             if (
-                (!editData || (editData && username.trim() !== editData.username)) &&
-                (await checkUsernameExists(username.trim()))
+                (!editData || (editData && username !== editData.username)) &&
+                (await checkUsernameExists(username))
             ) {
                 showWarnToast('Username already exists. Please choose another.');
                 setIsSubmitting(false);
                 return;
             }
 
-            // For safety, check email existence again before submit (if changed)
+            // Check email uniqueness before submit if changed
             if (
-                (!editData || (editData && email.trim() !== editData.email)) &&
-                (await checkEmailExists(email.trim()))
+                (!editData || (editData && email !== editData.email)) &&
+                (await checkEmailExists(email))
             ) {
                 showWarnToast('Email already exists. Please choose another.');
                 setIsSubmitting(false);
@@ -210,9 +227,9 @@ const AddUserModal = ({ editData, onClose, onUserAddedOrUpdated }) => {
                 : `http://localhost:4000/api/admin/users`;
 
             const payload = {
-                username: username.trim(),
-                email: email.trim(),
-                role: role.trim(),
+                username,
+                email,
+                role,
             };
             if (password) {
                 payload.password = password;
@@ -305,8 +322,7 @@ const AddUserModal = ({ editData, onClose, onUserAddedOrUpdated }) => {
                     <button
                         type="button"
                         onClick={() => setShowPassword((prev) => !prev)}
-                        className="absolute right-3 top-1/2 transform translate-y-[10%] text-gray-600 focus:outline-none"
-                        tabIndex={-1}
+                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-600 focus:outline-none"
                         aria-label={showPassword ? 'Hide password' : 'Show password'}
                     >
                         {showPassword ? <FaEyeSlash /> : <FaEye />}
@@ -327,8 +343,7 @@ const AddUserModal = ({ editData, onClose, onUserAddedOrUpdated }) => {
                     <button
                         type="button"
                         onClick={() => setShowRetypePassword((prev) => !prev)}
-                        className="absolute right-3 top-1/2 transform translate-y-[10%] text-gray-600 focus:outline-none"
-                        tabIndex={-1}
+                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-600 focus:outline-none"
                         aria-label={showRetypePassword ? 'Hide password' : 'Show password'}
                     >
                         {showRetypePassword ? <FaEyeSlash /> : <FaEye />}
