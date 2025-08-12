@@ -5,8 +5,8 @@ import AddUserModal from '../components/CommonComponents/AddUserModal';
 import { MdEdit, MdDelete } from 'react-icons/md';
 import { showSuccessToast, showErrorToast } from '../utils/toast';
 
-// Only show these roles on user list
-const ALLOWED_ROLES = ['Cashier', 'Manager'];
+// Roles to exclude from the list
+const ROLES_TO_EXCLUDE = ['Admin', 'SuperAdmin'];
 
 const UserList = () => {
     const [users, setUsers] = useState([]);
@@ -20,16 +20,19 @@ const UserList = () => {
 
     const usersPerPage = 5;
 
+    const currentUser = React.useMemo(() => {
+        try {
+            return JSON.parse(localStorage.getItem('user')) || {};
+        } catch {
+            return {};
+        }
+    }, []);
+
     const loadUsers = useCallback(async () => {
         setLoading(true);
         try {
             const res = await fetchUsers();
-            const fetchedUsers = res.data.data || [];
-
-            // Filter out users not in allowed roles
-            const filteredByRole = fetchedUsers.filter(user => ALLOWED_ROLES.includes(user.role));
-
-            setUsers(filteredByRole);
+            setUsers(res.data.data || []);
         } catch (error) {
             console.error('Error fetching users:', error);
             showErrorToast('Failed to fetch users.');
@@ -42,12 +45,33 @@ const UserList = () => {
         loadUsers();
     }, [loadUsers]);
 
+    const filteredUsers = users.filter(user => {
+        const matchesCustomer = user.customer_id === currentUser.customer_id;
+        const roleExcluded = ROLES_TO_EXCLUDE.includes(user.role);
+        const matchesSearch = user.username.toLowerCase().includes(searchTerm.toLowerCase());
+
+        return matchesCustomer && !roleExcluded && matchesSearch;
+    });
+
+    const totalPages = Math.max(Math.ceil(filteredUsers.length / usersPerPage), 1);
+    const indexOfLastUser = currentPage * usersPerPage;
+    const indexOfFirstUser = indexOfLastUser - usersPerPage;
+    const currentUsers = filteredUsers.slice(indexOfFirstUser, indexOfLastUser);
+
+    useEffect(() => {
+        if (currentPage > totalPages) {
+            setCurrentPage(1);
+        }
+    }, [filteredUsers, currentPage, totalPages]);
+
     const handleConfirmDelete = async () => {
         try {
             await deleteUser(selectedUserId);
-            setUsers(prev => prev.map(user =>
-                user.id === selectedUserId ? { ...user, status: 'DELETED' } : user
-            ));
+            setUsers(prev =>
+                prev.map(user =>
+                    user.id === selectedUserId ? { ...user, status: 'DELETED' } : user
+                )
+            );
             setShowDeleteModal(false);
             showSuccessToast('User deleted successfully.');
         } catch (error) {
@@ -62,7 +86,12 @@ const UserList = () => {
     };
 
     const handleEditUser = (user) => {
-        setSelectedUser(user);
+        const normalizedRole = user.role?.trim();
+        const userWithNormalizedRole = {
+            ...user,
+            role: ROLES_TO_EXCLUDE.includes(normalizedRole) ? '' : normalizedRole,
+        };
+        setSelectedUser(userWithNormalizedRole);
         setShowAddEditModal(true);
     };
 
@@ -81,23 +110,6 @@ const UserList = () => {
         setShowDeleteModal(true);
     };
 
-    // Search filter (case-insensitive)
-    const filteredUsers = users.filter(user =>
-        user.username.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-
-    // Pagination setup
-    useEffect(() => {
-        if (currentPage > Math.ceil(filteredUsers.length / usersPerPage)) {
-            setCurrentPage(1);
-        }
-    }, [filteredUsers, currentPage]);
-
-    const indexOfLastUser = currentPage * usersPerPage;
-    const indexOfFirstUser = indexOfLastUser - usersPerPage;
-    const currentUsers = filteredUsers.slice(indexOfFirstUser, indexOfLastUser);
-    const totalPages = Math.max(Math.ceil(filteredUsers.length / usersPerPage), 1);
-
     const handlePreviousPage = () => {
         if (currentPage > 1) setCurrentPage(prev => prev - 1);
     };
@@ -108,7 +120,7 @@ const UserList = () => {
 
     return (
         <div className="px-6 py-10 max-w-7xl mx-auto min-h-screen bg-[#F3F4F6]">
-            {/* Search bar and Add User button */}
+            {/* Search and add user */}
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
                 <input
                     type="text"
@@ -132,6 +144,7 @@ const UserList = () => {
 
             <h2 className="text-3xl font-bold text-[#1F2937] mb-4">Users List</h2>
 
+            {/* Users Table */}
             <div className="bg-white rounded-2xl shadow-lg overflow-x-auto border border-gray-200">
                 <table className="min-w-full text-sm text-gray-800">
                     <thead className="bg-[#F9FAFB] text-[#6B7280] uppercase text-xs tracking-wide">
@@ -140,13 +153,16 @@ const UserList = () => {
                             <th className="px-6 py-5 text-left">Username</th>
                             <th className="px-6 py-5 text-left">Email</th>
                             <th className="px-6 py-5 text-left">Role</th>
+                            {/* Added Status column */}
+                            <th className="px-6 py-5 text-left">Status</th>
                             <th className="px-6 py-5 text-left">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
                         {currentUsers.length === 0 ? (
                             <tr>
-                                <td colSpan={5} className="text-center text-gray-400 py-10">
+                                {/* colspan updated to 6 */}
+                                <td colSpan={6} className="text-center text-gray-400 py-10">
                                     No users found.
                                 </td>
                             </tr>
@@ -161,8 +177,24 @@ const UserList = () => {
                                     <td className="px-6 py-4 font-semibold text-[#111827]">{user.username}</td>
                                     <td className="px-6 py-4">{user.email}</td>
                                     <td className="px-6 py-4">{user.role}</td>
+
+                                    {/* Status badge with colors */}
+                                    <td className="px-6 py-4">
+                                        <span
+                                            className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${user.status === 'ACTIVE'
+                                                ? 'bg-green-100 text-green-600'
+                                                : user.status === 'INACTIVE'
+                                                    ? 'bg-gray-200 text-gray-400'
+                                                    : 'bg-red-100 text-red-600'
+                                                }`}
+                                        >
+                                            {user.status}
+                                        </span>
+                                    </td>
+
                                     <td className="px-6 py-4">
                                         <div className="flex items-center gap-3">
+                                            {/* Disable buttons if user is soft deleted */}
                                             {user.status !== 'DELETED' && (
                                                 <>
                                                     <button
@@ -191,6 +223,7 @@ const UserList = () => {
                 </table>
             </div>
 
+            {/* Pagination */}
             <div className="mt-8 flex justify-center items-center gap-1">
                 <button
                     onClick={handlePreviousPage}
@@ -228,6 +261,7 @@ const UserList = () => {
                 </button>
             </div>
 
+            {/* Add/Edit User Modal */}
             {showAddEditModal && (
                 <AddUserModal
                     editData={selectedUser}
@@ -236,12 +270,14 @@ const UserList = () => {
                 />
             )}
 
+            {/* Delete Confirmation Modal */}
             <DeleteModal
                 isOpen={showDeleteModal}
                 onClose={() => setShowDeleteModal(false)}
                 onConfirm={handleConfirmDelete}
                 title="Delete User"
-                message={`Are you sure you want to delete "${users.find((u) => u.id === selectedUserId)?.username || 'this user'}"?`}
+                message={`Are you sure you want to delete "${users.find(u => u.id === selectedUserId)?.username || 'this user'
+                    }"?`}
                 confirmText="Yes"
                 cancelText="No"
                 type="delete"
