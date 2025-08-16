@@ -1,25 +1,31 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { fetchUsers, deleteUser } from '../services/usersApi';
+import axios from 'axios';
 import DeleteModal from '../components/CommonComponents/ConfirmationModal';
 import AddUserModal from '../components/CommonComponents/AddUserModal';
-import { MdEdit, MdDelete } from 'react-icons/md';
+import { MdEdit, MdDelete, MdToggleOn, MdToggleOff } from 'react-icons/md';
 import { showSuccessToast, showErrorToast } from '../utils/toast';
 
-// Roles to exclude from the list
+// Roles that should be excluded from the list
 const ROLES_TO_EXCLUDE = ['Admin', 'SuperAdmin'];
 
 const UserList = () => {
-    const [users, setUsers] = useState([]);
-    const [selectedUserId, setSelectedUserId] = useState(null);
-    const [showDeleteModal, setShowDeleteModal] = useState(false);
-    const [showAddEditModal, setShowAddEditModal] = useState(false);
-    const [selectedUser, setSelectedUser] = useState(null);
-    const [searchTerm, setSearchTerm] = useState('');
-    const [currentPage, setCurrentPage] = useState(1);
-    const [loading, setLoading] = useState(false);
+    // ===================
+    // States
+    // ===================
+    const [users, setUsers] = useState([]); // all users
+    const [selectedUserId, setSelectedUserId] = useState(null); // for delete
+    const [selectedUser, setSelectedUser] = useState(null); // for edit
+    const [selectedToggleUser, setSelectedToggleUser] = useState(null); // for status toggle
+    const [showDeleteModal, setShowDeleteModal] = useState(false); // delete modal
+    const [showAddEditModal, setShowAddEditModal] = useState(false); // add/edit modal
+    const [isToggleModalOpen, setIsToggleModalOpen] = useState(false); // toggle status modal
+    const [searchTerm, setSearchTerm] = useState(''); // search input
+    const [currentPage, setCurrentPage] = useState(1); // pagination
+    const [loading, setLoading] = useState(false); // loading state
 
-    const usersPerPage = 5;
+    const usersPerPage = 5; // number of users per page
 
+    // Current logged-in user from localStorage
     const currentUser = React.useMemo(() => {
         try {
             return JSON.parse(localStorage.getItem('user')) || {};
@@ -28,10 +34,18 @@ const UserList = () => {
         }
     }, []);
 
+    const baseURL = 'http://localhost:4000/api/admin/users';
+
+    // ===================
+    // Fetch users from backend
+    // ===================
     const loadUsers = useCallback(async () => {
         setLoading(true);
         try {
-            const res = await fetchUsers();
+            const token = localStorage.getItem('token');
+            const res = await axios.get(baseURL, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
             setUsers(res.data.data || []);
         } catch (error) {
             console.error('Error fetching users:', error);
@@ -45,11 +59,13 @@ const UserList = () => {
         loadUsers();
     }, [loadUsers]);
 
+    // ===================
+    // Filter and paginate users
+    // ===================
     const filteredUsers = users.filter(user => {
         const matchesCustomer = user.customer_id === currentUser.customer_id;
         const roleExcluded = ROLES_TO_EXCLUDE.includes(user.role);
         const matchesSearch = user.username.toLowerCase().includes(searchTerm.toLowerCase());
-
         return matchesCustomer && !roleExcluded && matchesSearch;
     });
 
@@ -59,18 +75,23 @@ const UserList = () => {
     const currentUsers = filteredUsers.slice(indexOfFirstUser, indexOfLastUser);
 
     useEffect(() => {
-        if (currentPage > totalPages) {
-            setCurrentPage(1);
-        }
+        if (currentPage > totalPages) setCurrentPage(1);
     }, [filteredUsers, currentPage, totalPages]);
 
+    // ===================
+    // Delete user (soft delete)
+    // ===================
     const handleConfirmDelete = async () => {
         try {
-            await deleteUser(selectedUserId);
+            const token = localStorage.getItem('token');
+            await axios.put(
+                `${baseURL}/${selectedUserId}/status`,
+                { status: 'DELETED' },
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
+
             setUsers(prev =>
-                prev.map(user =>
-                    user.id === selectedUserId ? { ...user, status: 'DELETED' } : user
-                )
+                prev.map(u => (u.id === selectedUserId ? { ...u, status: 'DELETED' } : u))
             );
             setShowDeleteModal(false);
             showSuccessToast('User deleted successfully.');
@@ -80,6 +101,36 @@ const UserList = () => {
         }
     };
 
+    // ===================
+    // Toggle user status ACTIVE ↔ INACTIVE
+    // ===================
+    const handleToggleUserStatus = async () => {
+        try {
+            const newStatus = selectedToggleUser.status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE';
+            const token = localStorage.getItem('token');
+
+            await axios.put(
+                `${baseURL}/${selectedToggleUser.id}/status`,
+                { status: newStatus },
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
+
+            setUsers(prev =>
+                prev.map(u =>
+                    u.id === selectedToggleUser.id ? { ...u, status: newStatus } : u
+                )
+            );
+            setIsToggleModalOpen(false);
+            showSuccessToast(`User status set to ${newStatus}.`);
+        } catch (error) {
+            console.error('Error toggling user status:', error);
+            showErrorToast('Failed to update user status.');
+        }
+    };
+
+    // ===================
+    // Handle add/edit
+    // ===================
     const handleAddUser = () => {
         setSelectedUser(null);
         setShowAddEditModal(true);
@@ -105,11 +156,9 @@ const UserList = () => {
         handleCloseModal();
     };
 
-    const handleShowDeleteModal = (id) => {
-        setSelectedUserId(id);
-        setShowDeleteModal(true);
-    };
-
+    // ===================
+    // Pagination controls
+    // ===================
     const handlePreviousPage = () => {
         if (currentPage > 1) setCurrentPage(prev => prev - 1);
     };
@@ -118,9 +167,12 @@ const UserList = () => {
         if (currentPage < totalPages) setCurrentPage(prev => prev + 1);
     };
 
+    // ===================
+    // JSX Return
+    // ===================
     return (
         <div className="px-6 py-10 max-w-7xl mx-auto min-h-screen bg-[#F3F4F6]">
-            {/* Search and add user */}
+            {/* Search & Add User */}
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
                 <input
                     type="text"
@@ -153,7 +205,6 @@ const UserList = () => {
                             <th className="px-6 py-5 text-left">Username</th>
                             <th className="px-6 py-5 text-left">Email</th>
                             <th className="px-6 py-5 text-left">Role</th>
-                            {/* Added Status column */}
                             <th className="px-6 py-5 text-left">Status</th>
                             <th className="px-6 py-5 text-left">Actions</th>
                         </tr>
@@ -161,7 +212,6 @@ const UserList = () => {
                     <tbody>
                         {currentUsers.length === 0 ? (
                             <tr>
-                                {/* colspan updated to 6 */}
                                 <td colSpan={6} className="text-center text-gray-400 py-10">
                                     No users found.
                                 </td>
@@ -178,7 +228,7 @@ const UserList = () => {
                                     <td className="px-6 py-4">{user.email}</td>
                                     <td className="px-6 py-4">{user.role}</td>
 
-                                    {/* Status badge with colors */}
+                                    {/* Status Badge */}
                                     <td className="px-6 py-4">
                                         <span
                                             className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${user.status === 'ACTIVE'
@@ -192,11 +242,12 @@ const UserList = () => {
                                         </span>
                                     </td>
 
+                                    {/* Actions */}
                                     <td className="px-6 py-4">
                                         <div className="flex items-center gap-3">
-                                            {/* Disable buttons if user is soft deleted */}
                                             {user.status !== 'DELETED' && (
                                                 <>
+                                                    {/* Edit */}
                                                     <button
                                                         onClick={() => handleEditUser(user)}
                                                         className="cursor-pointer text-white bg-[#081A4B] p-1 rounded-md hover:bg-[#061533]"
@@ -205,8 +256,25 @@ const UserList = () => {
                                                         <MdEdit size={14} />
                                                     </button>
 
+                                                    {/* Toggle Status */}
                                                     <button
-                                                        onClick={() => handleShowDeleteModal(user.id)}
+                                                        onClick={() => {
+                                                            setSelectedToggleUser(user);
+                                                            setIsToggleModalOpen(true);
+                                                        }}
+                                                        title="Toggle Status"
+                                                        className="transition"
+                                                    >
+                                                        {user.status === 'ACTIVE' ? (
+                                                            <MdToggleOn size={30} className="text-green-500" />
+                                                        ) : (
+                                                            <MdToggleOff size={30} className="text-gray-400" />
+                                                        )}
+                                                    </button>
+
+                                                    {/* Delete */}
+                                                    <button
+                                                        onClick={() => setSelectedUserId(user.id) || setShowDeleteModal(true)}
                                                         className="text-red-500 hover:text-red-700"
                                                         title="Delete User"
                                                     >
@@ -278,6 +346,19 @@ const UserList = () => {
                 title="Delete User"
                 message={`Are you sure you want to delete "${users.find(u => u.id === selectedUserId)?.username || 'this user'
                     }"?`}
+                confirmText="Yes"
+                cancelText="No"
+                type="delete"
+            />
+
+            {/* Status Toggle Confirmation Modal */}
+            <DeleteModal
+                isOpen={isToggleModalOpen}
+                onClose={() => setIsToggleModalOpen(false)}
+                onConfirm={handleToggleUserStatus}
+                title="Change User Status"
+                message={`Are you sure you want to set this user to ${selectedToggleUser?.status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE'
+                    }?`}
                 confirmText="Yes"
                 cancelText="No"
                 type="delete"
