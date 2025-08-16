@@ -1,28 +1,25 @@
+// api/userApi.js
 import axios from 'axios';
 
-// Base URL for user endpoints
-const API_URL = 'http://localhost:4000/api/admin/users';
+// Create axios instance with base settings
+const api = axios.create({
+    baseURL: 'http://localhost:4000/api/admin/users',
+});
 
-// Get token from local storage
-const getToken = () => localStorage.getItem('token');
+// Attach token automatically before requests
+api.interceptors.request.use((config) => {
+    const token = localStorage.getItem('token');
+    if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+});
 
-// Fetch all users
-export const fetchUsers = async () => {
-    return axios.get(API_URL, {
-        headers: { Authorization: `Bearer ${getToken()}` },
-    });
-};
+// Get all users
+export const fetchUsers = () => api.get('/');
 
-// Delete a user
-export const deleteUser = async (id) => {
-    return axios.delete(`${API_URL}/${id}`, {
-        headers: { Authorization: `Bearer ${getToken()}` },
-    });
-};
+// Delete a specific user
+export const deleteUser = (id) => api.delete(`/${id}`);
 
-// Update a user
-export const updateUser = async (id, data) => {
-    return axios.put(`${API_URL}/${id}`, data, {
-        headers: { Authorization: `Bearer ${getToken()}` },
-    });
-};
+// Update a specific user
+export const updateUser = (id, data) => api.put(`/${id}`, data);

@@ -1,10 +1,10 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import Sidebar from '../components/CommonComponents/Sidebar';
-import Header from '../components/CommonComponents/Header';
-import UserList from './UserList';
-import axios from 'axios';
-import { showSuccessToast, showErrorToast } from '../utils/toast';
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import Sidebar from "../components/CommonComponents/Sidebar";
+import Header from "../components/CommonComponents/Header";
+import UserList from "./UserList";
+import { showSuccessToast, showErrorToast } from "../utils/toast";
+import { deleteUser } from "../services/usersApi"; //API
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
@@ -18,34 +18,31 @@ export default function AdminDashboard() {
 
   // Edit user handler - opens edit modal with user data
   const handleEdit = (user) => {
-    console.log('Edit user:', user);
+    console.log("Edit user:", user);
     // TODO: setEditUser(user);
     // TODO: setShowEditModal(true);
   };
 
-  // Delete user handler with confirmation and API call
+  // Delete user handler
   const handleDelete = async (userId) => {
-    const confirmed = window.confirm('Are you sure you want to delete this user?');
+    const confirmed = window.confirm("Are you sure you want to delete this user?");
     if (!confirmed) return;
 
     try {
-      const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:4000/api';
-      await axios.delete(`${API_URL}/admin/users/${userId}`);
-
-      showSuccessToast('User deleted successfully');
-      // Refresh user list
-      setRefreshFlag((prev) => !prev);
+      await deleteUser(userId); // call service function
+      showSuccessToast("User deleted successfully");
+      setRefreshFlag((prev) => !prev); // trigger refresh
     } catch (error) {
-      console.error('Delete failed:', error);
-      showErrorToast('Failed to delete user. Check backend logs.');
+      console.error("Delete failed:", error);
+      showErrorToast("Failed to delete user. Check backend logs.");
     }
   };
 
   // Logout handler
   const handleLogout = () => {
-    localStorage.removeItem('isLoggedIn');
-    localStorage.removeItem('role');
-    navigate('/login'); // safer to navigate to login page explicitly
+    localStorage.removeItem("isLoggedIn");
+    localStorage.removeItem("role");
+    navigate("/login");
     window.location.reload();
   };
 

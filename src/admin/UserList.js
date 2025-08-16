@@ -5,25 +5,26 @@ import AddUserModal from '../components/CommonComponents/AddUserModal';
 import { MdEdit, MdDelete, MdToggleOn, MdToggleOff } from 'react-icons/md';
 import { showSuccessToast, showErrorToast } from '../utils/toast';
 
-// Roles that should be excluded from the list
+// exlcluded
 const ROLES_TO_EXCLUDE = ['Admin', 'SuperAdmin'];
 
 const UserList = () => {
     // ===================
-    // States
+    // states
     // ===================
-    const [users, setUsers] = useState([]); // all users
-    const [selectedUserId, setSelectedUserId] = useState(null); // for delete
-    const [selectedUser, setSelectedUser] = useState(null); // for edit
-    const [selectedToggleUser, setSelectedToggleUser] = useState(null); // for status toggle
-    const [showDeleteModal, setShowDeleteModal] = useState(false); // delete modal
-    const [showAddEditModal, setShowAddEditModal] = useState(false); // add/edit modal
-    const [isToggleModalOpen, setIsToggleModalOpen] = useState(false); // toggle status modal
-    const [searchTerm, setSearchTerm] = useState(''); // search input
-    const [currentPage, setCurrentPage] = useState(1); // pagination
-    const [loading, setLoading] = useState(false); // loading state
+    const [users, setUsers] = useState([]); // All users
+    const [searchTerm, setSearchTerm] = useState(''); // Search input
+    const [currentPage, setCurrentPage] = useState(1); // Pagination
+    const [loading, setLoading] = useState(false); // Loading state
 
-    const usersPerPage = 5; // number of users per page
+    // Consolidated modal state
+    const [modalState, setModalState] = useState({
+        type: null, // 'delete' | 'edit' | 'add' | 'toggle'
+        user: null, // the selected user
+        open: false // modal visibility
+    });
+
+    const usersPerPage = 5; // # of users per page
 
     // Current logged-in user from localStorage
     const currentUser = React.useMemo(() => {
@@ -82,18 +83,19 @@ const UserList = () => {
     // Delete user (soft delete)
     // ===================
     const handleConfirmDelete = async () => {
+        if (!modalState.user) return;
         try {
             const token = localStorage.getItem('token');
             await axios.put(
-                `${baseURL}/${selectedUserId}/status`,
+                `${baseURL}/${modalState.user.id}/status`,
                 { status: 'DELETED' },
                 { headers: { Authorization: `Bearer ${token}` } }
             );
 
             setUsers(prev =>
-                prev.map(u => (u.id === selectedUserId ? { ...u, status: 'DELETED' } : u))
+                prev.map(u => (u.id === modalState.user.id ? { ...u, status: 'DELETED' } : u))
             );
-            setShowDeleteModal(false);
+            closeModal();
             showSuccessToast('User deleted successfully.');
         } catch (error) {
             console.error('Error deleting user:', error);
@@ -105,22 +107,23 @@ const UserList = () => {
     // Toggle user status ACTIVE ↔ INACTIVE
     // ===================
     const handleToggleUserStatus = async () => {
+        if (!modalState.user) return;
         try {
-            const newStatus = selectedToggleUser.status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE';
+            const newStatus = modalState.user.status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE';
             const token = localStorage.getItem('token');
 
             await axios.put(
-                `${baseURL}/${selectedToggleUser.id}/status`,
+                `${baseURL}/${modalState.user.id}/status`,
                 { status: newStatus },
                 { headers: { Authorization: `Bearer ${token}` } }
             );
 
             setUsers(prev =>
                 prev.map(u =>
-                    u.id === selectedToggleUser.id ? { ...u, status: newStatus } : u
+                    u.id === modalState.user.id ? { ...u, status: newStatus } : u
                 )
             );
-            setIsToggleModalOpen(false);
+            closeModal();
             showSuccessToast(`User status set to ${newStatus}.`);
         } catch (error) {
             console.error('Error toggling user status:', error);
@@ -132,8 +135,7 @@ const UserList = () => {
     // Handle add/edit
     // ===================
     const handleAddUser = () => {
-        setSelectedUser(null);
-        setShowAddEditModal(true);
+        setModalState({ type: 'add', user: null, open: true });
     };
 
     const handleEditUser = (user) => {
@@ -142,18 +144,16 @@ const UserList = () => {
             ...user,
             role: ROLES_TO_EXCLUDE.includes(normalizedRole) ? '' : normalizedRole,
         };
-        setSelectedUser(userWithNormalizedRole);
-        setShowAddEditModal(true);
-    };
-
-    const handleCloseModal = () => {
-        setSelectedUser(null);
-        setShowAddEditModal(false);
+        setModalState({ type: 'edit', user: userWithNormalizedRole, open: true });
     };
 
     const handleUserAddedOrUpdated = () => {
         loadUsers();
-        handleCloseModal();
+        closeModal();
+    };
+
+    const closeModal = () => {
+        setModalState({ type: null, user: null, open: false });
     };
 
     // ===================
@@ -258,10 +258,7 @@ const UserList = () => {
 
                                                     {/* Toggle Status */}
                                                     <button
-                                                        onClick={() => {
-                                                            setSelectedToggleUser(user);
-                                                            setIsToggleModalOpen(true);
-                                                        }}
+                                                        onClick={() => setModalState({ type: 'toggle', user, open: true })}
                                                         title="Toggle Status"
                                                         className="transition"
                                                     >
@@ -274,7 +271,7 @@ const UserList = () => {
 
                                                     {/* Delete */}
                                                     <button
-                                                        onClick={() => setSelectedUserId(user.id) || setShowDeleteModal(true)}
+                                                        onClick={() => setModalState({ type: 'delete', user, open: true })}
                                                         className="text-red-500 hover:text-red-700"
                                                         title="Delete User"
                                                     >
@@ -330,39 +327,48 @@ const UserList = () => {
             </div>
 
             {/* Add/Edit User Modal */}
-            {showAddEditModal && (
+            {modalState.open && modalState.type === 'add' && (
                 <AddUserModal
-                    editData={selectedUser}
-                    onClose={handleCloseModal}
+                    editData={null}
+                    onClose={closeModal}
+                    onUserAddedOrUpdated={handleUserAddedOrUpdated}
+                />
+            )}
+            {modalState.open && modalState.type === 'edit' && (
+                <AddUserModal
+                    editData={modalState.user}
+                    onClose={closeModal}
                     onUserAddedOrUpdated={handleUserAddedOrUpdated}
                 />
             )}
 
             {/* Delete Confirmation Modal */}
-            <DeleteModal
-                isOpen={showDeleteModal}
-                onClose={() => setShowDeleteModal(false)}
-                onConfirm={handleConfirmDelete}
-                title="Delete User"
-                message={`Are you sure you want to delete "${users.find(u => u.id === selectedUserId)?.username || 'this user'
-                    }"?`}
-                confirmText="Yes"
-                cancelText="No"
-                type="delete"
-            />
+            {modalState.open && modalState.type === 'delete' && (
+                <DeleteModal
+                    isOpen
+                    onClose={closeModal}
+                    onConfirm={handleConfirmDelete}
+                    title="Delete User"
+                    message={`Are you sure you want to delete "${modalState.user?.username}"?`}
+                    confirmText="Yes"
+                    cancelText="No"
+                    type="delete"
+                />
+            )}
 
             {/* Status Toggle Confirmation Modal */}
-            <DeleteModal
-                isOpen={isToggleModalOpen}
-                onClose={() => setIsToggleModalOpen(false)}
-                onConfirm={handleToggleUserStatus}
-                title="Change User Status"
-                message={`Are you sure you want to set this user to ${selectedToggleUser?.status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE'
-                    }?`}
-                confirmText="Yes"
-                cancelText="No"
-                type="delete"
-            />
+            {modalState.open && modalState.type === 'toggle' && (
+                <DeleteModal
+                    isOpen
+                    onClose={closeModal}
+                    onConfirm={handleToggleUserStatus}
+                    title="Change User Status"
+                    message={`Are you sure you want to set this user to ${modalState.user?.status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE'}?`}
+                    confirmText="Yes"
+                    cancelText="No"
+                    type="delete"
+                />
+            )}
         </div>
     );
 };

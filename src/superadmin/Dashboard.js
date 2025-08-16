@@ -1,11 +1,11 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import Sidebar from '../components/CommonComponents/Sidebar';
-import Header from '../components/CommonComponents/Header';
-import CustomerTable from './CustomerTable';
-import AddCustomerModal from '../components/CommonComponents/AddCustomerModal'; // import modal
-import axios from 'axios';
-import { showSuccessToast, showErrorToast } from '../utils/toast'; // reusable toast
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import Sidebar from "../components/CommonComponents/Sidebar";
+import Header from "../components/CommonComponents/Header";
+import CustomerTable from "./CustomerTable";
+import AddCustomerModal from "../components/CommonComponents/AddCustomerModal";
+import { deleteCustomer } from "../services/customerApi"; //API 
+import { showSuccessToast, showErrorToast } from "../utils/toast";
 
 export default function SuperAdminDashboard() {
   const navigate = useNavigate();
@@ -13,59 +13,52 @@ export default function SuperAdminDashboard() {
   // trigger table refresh
   const [refreshFlag, setRefreshFlag] = useState(false);
 
-  // store customer data for editing
-  const [editData, setEditData] = useState(null);
+  // modal state (open/close + customer data)
+  const [modal, setModal] = useState({ isOpen: false, customer: null });
 
   // logout and reset session
   const handleLogout = () => {
-    localStorage.removeItem('token'); // remove token instead of isLoggedIn/role
-    navigate('/login');
-    window.location.reload(); // optional: force reset
+    localStorage.removeItem("token");
+    navigate("/login", { replace: true }); // no reload needed
   };
 
   // when edit button is clicked (set selected customer)
   const handleEdit = (customer) => {
-    setEditData(customer);
-    // triggers edit modal
+    setModal({ isOpen: true, customer });
   };
 
   // delete customer from DB
   const handleDelete = async (id) => {
-    if (!window.confirm('Are you sure you want to delete this customer?')) return;
+    if (!window.confirm("Are you sure you want to delete this customer?")) return;
 
     try {
-      await axios.delete(`http://localhost:3000/api/customers/${id}`);
-      setRefreshFlag(!refreshFlag); // trigger re-fetch after delete
-      showSuccessToast('Customer deleted successfully'); // toast on success
+      await deleteCustomer(id);
+      setRefreshFlag((prev) => !prev); // trigger re-fetch after delete
+      showSuccessToast("Customer deleted successfully");
     } catch (error) {
-      console.error('Delete failed:', error);
-      showErrorToast('Delete failed. Check backend logs.'); // toast on error
+      console.error("Delete failed:", error);
+      showErrorToast("Delete failed. Check backend logs.");
     }
   };
 
-  // close modal and clear state
+  // close modal
   const handleCloseModal = () => {
-    setEditData(null); // clear editData to hide modal
+    setModal({ isOpen: false, customer: null });
   };
 
   // when user is added or edited
   const handleUserAddedOrUpdated = () => {
-    setRefreshFlag(!refreshFlag); // trigger refresh
-    setEditData(null); // close modal after save
+    setRefreshFlag((prev) => !prev);
+    setModal({ isOpen: false, customer: null });
   };
 
   return (
     <div className="flex h-screen bg-gray-50">
-      <Sidebar role="superadmin" /> {/* superadmin sidebar */}
+      <Sidebar role="superadmin" />
       <div className="flex-1 flex flex-col overflow-hidden">
-        <Header onLogout={handleLogout} /> {/* header with logout */}
+        <Header onLogout={handleLogout} />
 
         <main className="p-6 overflow-auto">
-          <div className="flex justify-between items-center mb-6">
-            {/* removed text heading */}
-          </div>
-
-          {/* customer table with refresh, edit, delete handlers */}
           <CustomerTable
             refreshTrigger={refreshFlag}
             onEdit={handleEdit}
@@ -74,10 +67,10 @@ export default function SuperAdminDashboard() {
         </main>
       </div>
 
-      {/* render AddCustomerModal only if editData is set */}
-      {editData && (
+      {/* Add/Edit Modal */}
+      {modal.isOpen && (
         <AddCustomerModal
-          editData={editData}
+          editData={modal.customer}
           onClose={handleCloseModal}
           onUserAddedOrUpdated={handleUserAddedOrUpdated}
         />
