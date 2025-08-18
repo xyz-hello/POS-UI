@@ -28,9 +28,14 @@ export default function Header() {
   // Logout handler
   const handleLogout = () => {
     localStorage.removeItem('token');
-    localStorage.removeItem('isLoggedIn');
+    localStorage.removeItem('isLoggedIn', 'false'); //user logout
     localStorage.removeItem('user');
-    navigate('/');
+
+    // Redirect based on role
+    if (user?.user_type === 0) navigate('/superadmin/login'); // SuperAdmin
+    else if (user?.user_type === 1) navigate('/admin/login'); // Admin
+    else navigate('/login'); // POS / cashier
+
   };
 
   // Close dropdown when clicking outside

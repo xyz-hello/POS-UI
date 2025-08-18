@@ -1,9 +1,8 @@
-// src/api/axiosInstance.js
 import axios from "axios";
 
 // Create a single axios instance
 const axiosInstance = axios.create({
-    baseURL: "http://localhost:4000/api",
+    baseURL: "http://localhost:4000/api", //backend
 });
 
 // Automatically add token to headers

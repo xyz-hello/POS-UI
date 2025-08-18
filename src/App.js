@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 import Login from './pages/Login';
 import SuperAdminDashboard from './superadmin/Dashboard';
 import AdminDashboard from './admin/Dashboard';
+import POSLogin from './pages/POS/Login';
+import POSDashboard from './clients/POS/Dashboard';
 import ProtectedRoute from './components/ProtectedRoute';
 
 function App() {
@@ -24,20 +26,33 @@ function App() {
 
   return (
     <Router>
-      <Routes>
-        {/* Public login route */}
-        <Route path="/" element={<Login setIsLoggedIn={setIsLoggedIn} />} />
+      {/* Global Toast container for all routes */}
+      <ToastContainer
+        position="bottom-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop
+        closeOnClick
+        pauseOnHover
+        draggable
+      />
 
-        {/* Protected routes with role-based access */}
+      <Routes>
+        {/* Public login routes */}
+        <Route path="/" element={<Navigate to="/login" replace />} />
+        <Route path="/login" element={<POSLogin setIsLoggedIn={setIsLoggedIn} />} />
+        <Route path="/admin/login" element={<Login role="admin" setIsLoggedIn={setIsLoggedIn} />} />
+        <Route path="/superadmin/login" element={<Login role="superadmin" setIsLoggedIn={setIsLoggedIn} />} />
+
+        {/* Protected routes */}
         <Route
-          path="/superadmin/dashboard"
+          path="/dashboard"
           element={
-            <ProtectedRoute allowedRoles={['superadmin']}>
-              <SuperAdminDashboard setIsLoggedIn={setIsLoggedIn} />
+            <ProtectedRoute allowedRoles={['cashier']}>
+              <POSDashboard setIsLoggedIn={setIsLoggedIn} />
             </ProtectedRoute>
           }
         />
-
         <Route
           path="/admin/dashboard"
           element={
@@ -46,10 +61,15 @@ function App() {
             </ProtectedRoute>
           }
         />
+        <Route
+          path="/superadmin/dashboard"
+          element={
+            <ProtectedRoute allowedRoles={['superadmin']}>
+              <SuperAdminDashboard setIsLoggedIn={setIsLoggedIn} />
+            </ProtectedRoute>
+          }
+        />
       </Routes>
-
-      {/* Toast notifications container */}
-      <ToastContainer position="bottom-right" autoClose={3000} />
     </Router>
   );
 }
