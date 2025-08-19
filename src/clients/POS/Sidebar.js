@@ -1,47 +1,77 @@
-import React from 'react';
-import { FaSearch, FaUserCircle, FaHome, FaShoppingCart, FaUsers, FaCog } from 'react-icons/fa';
+import React, { useState } from "react";
+import { Home, Clipboard, Table, User, HelpCircle, LogOut, Settings } from "lucide-react";
 
-export default function Sidebar({ active }) {
+const Sidebar = () => {
+    const [active, setActive] = useState("Dashboard");
+    const [collapsed, setCollapsed] = useState(false); // for responsive collapse
+
     const menuItems = [
-        { name: 'Dashboard', icon: FaHome },
-        { name: 'Orders', icon: FaShoppingCart },
-        { name: 'Customers', icon: FaUsers },
-        { name: 'Settings', icon: FaCog },
+        { name: "Dashboard", icon: Home },
+        { name: "Order Line", icon: Clipboard },
+        { name: "Manage Table", icon: Table },
+        { name: "Customers", icon: User },
     ];
 
-    return (
-        <div className="w-64 bg-[#081A4B] text-white h-screen flex flex-col p-6">
-            <h2 className="text-2xl font-bold mb-8">Tasty Station</h2>
+    const bottomItems = [
+        { name: "Help Center", icon: HelpCircle },
+        { name: "Settings", icon: Settings },
+        { name: "Logout", icon: LogOut },
+    ];
 
-            <div className="flex items-center gap-2 mb-6">
-                <FaSearch className="text-gray-400" />
-                <input
-                    type="text"
-                    placeholder="Search"
-                    className="bg-[#162450] text-white px-4 py-2 rounded-lg w-full"
-                />
+    // Render each menu item
+    const renderMenuItem = (item) => {
+        const Icon = item.icon;
+        const isActive = active === item.name;
+
+        return (
+            <button
+                key={item.name}
+                onClick={() => setActive(item.name)}
+                className={`w-full flex items-center px-7 py-3 rounded-lg transition-colors
+          ${isActive ? "bg-green-100/50" : "hover:bg-green-100/30"}`}
+            >
+                {/* Only icon changes color when active */}
+                <Icon size={20} className={`${isActive ? "text-okGreen" : "text-gray-700"}`} />
+
+                {/* Show label if sidebar is not collapsed */}
+                {!collapsed && (
+                    <span
+                        className="ml-3 text-gray-800 font-medium"
+                        style={{ fontSize: "16px" }} // manual font size adjustment
+                    >
+                        {item.name}
+                    </span>
+                )}
+            </button>
+        );
+    };
+
+    return (
+        <div
+            className={`h-screen bg-white shadow-md flex flex-col justify-between text-gray-700
+        ${collapsed ? "w-16" : "w-64"} transition-all duration-300 overflow-auto`}
+        >
+            {/* Toggle button for mobile / collapse */}
+            <div className="p-4 flex justify-end sm:hidden">
+                <button
+                    onClick={() => setCollapsed(!collapsed)}
+                    className="p-2 bg-gray-200 rounded-full hover:bg-gray-300 transition"
+                >
+                    {collapsed ? "→" : "←"}
+                </button>
             </div>
 
-            <nav className="flex-1">
-                {menuItems.map((item) => {
-                    const Icon = item.icon;
-                    return (
-                        <div
-                            key={item.name}
-                            className={`flex items-center gap-3 p-3 rounded-lg cursor-pointer hover:bg-[#162450] ${active === item.name ? 'bg-[#162450]' : ''
-                                }`}
-                        >
-                            <Icon className="w-5 h-5" />
-                            <span>{item.name}</span>
-                        </div>
-                    );
-                })}
+            {/* Main menu */}
+            <nav className="flex-1 flex flex-col gap-3 px-2 sm:px-4 pt-8 sm:pt-32">
+                {menuItems.map(renderMenuItem)}
             </nav>
 
-            <div className="mt-auto flex items-center gap-3">
-                <FaUserCircle className="w-8 h-8" />
-                <span>Cashier</span>
+            {/* Bottom menu */}
+            <div className="px-2 sm:px-4 pb-6 flex flex-col gap-2">
+                {bottomItems.map(renderMenuItem)}
             </div>
         </div>
     );
-}
+};
+
+export default Sidebar;

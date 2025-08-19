@@ -2,90 +2,70 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { FaUser, FaLock, FaEye, FaEyeSlash } from 'react-icons/fa';
+import { toast } from 'react-toastify';
 import logo from '../assets/logo.png';
 
-export default function Login({ setIsLoggedIn }) {
+export default function Login({ role, setIsLoggedIn }) {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState('');
   const navigate = useNavigate();
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    setError('');
 
     try {
-      const response = await axios.post('http://localhost:4000/api/auth/login', {
-        username,
-        password,
-      });
-
+      const response = await axios.post('http://localhost:4000/api/auth/login', { username, password });
       const { token, user } = response.data;
 
-      if (token && user) {
-        // Save token and login status
-        localStorage.setItem('token', token);
-        localStorage.setItem('isLoggedIn', 'true');
+      // Map role string to numeric user_type
+      const roleMap = { superadmin: 0, admin: 1, cashier: 2 };
 
-        // Normalize and save role as lowercase string for consistent role checks
-        // Assuming user.user_type: 0 = superadmin, 1 = admin, 2 = cashier
-        let role = '';
-        if (user.user_type === 0) role = 'superadmin';
-        else if (user.user_type === 1) role = 'admin';
-        else if (user.user_type === 2) role = 'cashier';
-        else {
-          setError('Unknown role');
-          return;
-        }
-        localStorage.setItem('role', role);
-
-        // Save full user info as JSON string for other parts of app if needed
-        localStorage.setItem('user', JSON.stringify(user));
-
-        setIsLoggedIn(true);
-
-        // Redirect to dashboard by role
-        if (role === 'superadmin') navigate('/superadmin/dashboard');
-        else if (role === 'admin') navigate('/admin/dashboard');
-        else if (role === 'cashier') navigate('/cashier/dashboard');
-      } else {
-        setError('Invalid credentials');
+      // Role restriction
+      if (user.user_type !== roleMap[role]) {
+        toast.error(`You cannot log in here. This page is for ${role}.`);
+        return;
       }
+
+      // Save token, user info, and login status
+      localStorage.setItem('token', token);
+      localStorage.setItem('user', JSON.stringify(user));
+      localStorage.setItem('isLoggedIn', 'true');
+      localStorage.setItem('role', role);
+      setIsLoggedIn(true);
+
+      // Redirect based on role
+      if (role === 'superadmin') navigate('/superadmin/dashboard');
+      else if (role === 'admin') navigate('/admin/dashboard');
+      else navigate('/dashboard'); // cashier / POS
     } catch (err) {
       console.error(err);
-      setError('Invalid credentials');
+      toast.error(err.response?.data?.message || 'Invalid credentials');
     }
   };
 
   return (
     <div className="flex min-h-screen">
+      {/* Left panel: branding */}
       <div className="hidden md:flex w-1/2 bg-[#081A4B] flex-col justify-center items-center px-6">
         <div className="flex flex-col justify-center items-center h-full text-white p-10">
-          <h2 className="text-4xl font-bold mb-4 text-center">
-            Unified Client Management
-          </h2>
+          <h2 className="text-4xl font-bold mb-4 text-center">Unified Client Management</h2>
           <p className="text-md text-gray-200 text-center">
             Manage clients, users, and operations — all in one unified dashboard.
           </p>
         </div>
       </div>
 
-      {/* Right panel: light gray background, center the card */}
+      {/* Right panel: login card */}
       <div className="flex flex-col w-full md:w-1/2 bg-gray-50 justify-center items-center p-8">
         <div className="bg-white p-8 rounded-xl shadow-lg w-full max-w-md flex flex-col items-center">
-          <img
-            src={logo}
-            alt="Logo"
-            className="w-48 h-auto max-h-40 mb-6 object-scale-down"
-          />
-          <h1 className="text-3xl font-semibold text-[#081A4B] mb-6">Log into your Account</h1>
+          <img src={logo} alt="Logo" className="w-48 h-auto max-h-40 mb-6 object-scale-down" />
+          <h1 className="text-3xl font-semibold text-[#081A4B] mb-6 capitalize">{role} Login</h1>
 
-          <form onSubmit={handleLogin} className="space-y-4">
+          <form onSubmit={handleLogin} className="space-y-4 w-full">
             <div className="relative">
               <FaUser className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
               <input
-                id="username"
                 type="text"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
@@ -98,7 +78,6 @@ export default function Login({ setIsLoggedIn }) {
             <div className="relative">
               <FaLock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
               <input
-                id="password"
                 type={showPassword ? 'text' : 'password'}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
@@ -123,12 +102,9 @@ export default function Login({ setIsLoggedIn }) {
             >
               Log In
             </button>
-
-            {error && <p className="text-red-600 text-center mt-2 text-sm">{error}</p>}
           </form>
 
-          <div className="mt-8 p-6 border border-gray-200 rounded-md shadow-sm bg-[#f9fafb]">
-            <h2 className="text-lg font-semibold text-[#081A4B] mb-2">Your Account</h2>
+          <div className="mt-8 p-6 border border-gray-200 rounded-md shadow-sm bg-[#f9fafb] text-center">
             <p className="text-gray-700 text-sm leading-relaxed">
               Manage your settings and preferences. Contact your admin if you don’t have access.
             </p>
