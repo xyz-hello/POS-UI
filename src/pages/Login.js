@@ -60,8 +60,7 @@ export default function Login({ role, setIsLoggedIn }) {
       <div className="flex flex-col w-full md:w-1/2 bg-gray-50 justify-center items-center p-8">
         <div className="bg-white p-8 rounded-xl shadow-lg w-full max-w-md flex flex-col items-center">
           <img src={logo} alt="Logo" className="w-48 h-auto max-h-40 mb-6 object-scale-down" />
-          <h1 className="text-3xl font-semibold text-[#081A4B] mb-6 capitalize">{role} Login</h1>
-
+          <h1 className="text-3xl font-semibold text-[#081A4B] mb-6">Log in to your account</h1>
           <form onSubmit={handleLogin} className="space-y-4 w-full">
             <div className="relative">
               <FaUser className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
