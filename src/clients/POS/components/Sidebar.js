@@ -28,16 +28,16 @@ const Sidebar = () => {
                 key={item.name}
                 onClick={() => setActive(item.name)}
                 className={`w-full flex items-center px-7 py-3 rounded-lg transition-colors
-          ${isActive ? "bg-green-100/50" : "hover:bg-green-100/30"}`}
+                    ${isActive ? "bg-brandGreenLight/50" : "hover:bg-brandGreenLight/30"}`}
             >
-                {/* Only icon changes color when active */}
-                <Icon size={20} className={`${isActive ? "text-okGreen" : "text-gray-700"}`} />
+                {/* Icon changes color when active */}
+                <Icon size={20} className={`${isActive ? "text-brandGreen" : "text-neutralDark"}`} />
 
                 {/* Show label if sidebar is not collapsed */}
                 {!collapsed && (
                     <span
-                        className="ml-3 text-gray-800 font-medium"
-                        style={{ fontSize: "16px" }} // manual font size adjustment
+                        className="ml-3 text-neutralDark font-medium"
+                        style={{ fontSize: "16px" }}
                     >
                         {item.name}
                     </span>
@@ -48,8 +48,8 @@ const Sidebar = () => {
 
     return (
         <div
-            className={`h-screen bg-white shadow-md flex flex-col justify-between text-gray-700
-        ${collapsed ? "w-16" : "w-64"} transition-all duration-300 overflow-auto`}
+            className={`h-screen bg-white shadow-md flex flex-col justify-between text-neutralDark
+                ${collapsed ? "w-16" : "w-64"} transition-all duration-300 overflow-auto`}
         >
             {/* Toggle button for mobile / collapse */}
             <div className="p-4 flex justify-end sm:hidden">

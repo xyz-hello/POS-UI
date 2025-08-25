@@ -2,12 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-
 import Login from './pages/Login';
 import SuperAdminDashboard from './superadmin/Dashboard';
 import AdminDashboard from './admin/Dashboard';
 import POSLogin from './pages/POS/Login';
-import POSDashboard from './clients/POS/Dashboard';
+import POSDashboard from './clients/POS/pages/Dashboard';
 import ProtectedRoute from './components/ProtectedRoute';
 
 function App() {

@@ -1,4 +1,3 @@
-// src/pages/SettingsPage.js
 import React, { useState, useEffect } from 'react';
 import { showSuccessToast, showErrorToast, showWarnToast } from '../utils/toast';
 import AppPreferences from '../components/settings/AppPreferences';

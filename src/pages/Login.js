@@ -23,7 +23,7 @@ export default function Login({ role, setIsLoggedIn }) {
 
       // Role restriction
       if (user.user_type !== roleMap[role]) {
-        toast.error(`You cannot log in here. This page is for ${role}.`);
+        toast.error(`You do not have access to this page`);
         return;
       }
 
