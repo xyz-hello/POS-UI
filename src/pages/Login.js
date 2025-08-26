@@ -1,15 +1,32 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom'; // added useLocation
 import { FaUser, FaLock, FaEye, FaEyeSlash } from 'react-icons/fa';
 import { toast } from 'react-toastify';
 import logo from '../assets/logo.png';
+import Lottie from 'lottie-react';
+import loginAnimation from '../assets/animations/Login.json';
 
-export default function Login({ role, setIsLoggedIn }) {
+export default function Login({ setIsLoggedIn }) {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [role, setRole] = useState('cashier'); // default role
   const navigate = useNavigate();
+  const location = useLocation(); // get current path
+
+  // Determine role based on URL path
+  useEffect(() => {
+    if (location.pathname.includes('/superadmin')) setRole('superadmin');
+    else if (location.pathname.includes('/admin')) setRole('admin');
+    else setRole('cashier'); // default
+  }, [location.pathname]);
+
+  // Heading text dynamically
+  const loginRoleText =
+    role === 'superadmin' ? 'Super Admin Login' :
+      role === 'admin' ? 'Admin Login' :
+        'Cashier Login';
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -18,16 +35,15 @@ export default function Login({ role, setIsLoggedIn }) {
       const response = await axios.post('http://localhost:4000/api/auth/login', { username, password });
       const { token, user } = response.data;
 
-      // Map role string to numeric user_type
       const roleMap = { superadmin: 0, admin: 1, cashier: 2 };
 
-      // Role restriction
+      // Check if user role matches page role
       if (user.user_type !== roleMap[role]) {
         toast.error(`You do not have access to this page`);
         return;
       }
 
-      // Save token, user info, and login status
+      // Save login info
       localStorage.setItem('token', token);
       localStorage.setItem('user', JSON.stringify(user));
       localStorage.setItem('isLoggedIn', 'true');
@@ -37,7 +53,7 @@ export default function Login({ role, setIsLoggedIn }) {
       // Redirect based on role
       if (role === 'superadmin') navigate('/superadmin/dashboard');
       else if (role === 'admin') navigate('/admin/dashboard');
-      else navigate('/dashboard'); // cashier / POS
+      else navigate('/dashboard');
     } catch (err) {
       console.error(err);
       toast.error(err.response?.data?.message || 'Invalid credentials');
@@ -46,13 +62,14 @@ export default function Login({ role, setIsLoggedIn }) {
 
   return (
     <div className="flex min-h-screen">
-      {/* Left panel: branding */}
-      <div className="hidden md:flex w-1/2 bg-[#081A4B] flex-col justify-center items-center px-6">
-        <div className="flex flex-col justify-center items-center h-full text-white p-10">
-          <h2 className="text-4xl font-bold mb-4 text-center">Unified Client Management</h2>
-          <p className="text-md text-gray-200 text-center">
-            Manage clients, users, and operations — all in one unified dashboard.
-          </p>
+      {/* Left panel: Lottie animation */}
+      <div className="hidden md:flex w-1/2 bg-[#081A4B] justify-center items-center px-6">
+        <div className="w-full h-full flex justify-center items-center">
+          <Lottie
+            animationData={loginAnimation}
+            loop={true}
+            className="w-full h-full max-w-lg max-h-[500px]"
+          />
         </div>
       </div>
 
@@ -60,7 +77,7 @@ export default function Login({ role, setIsLoggedIn }) {
       <div className="flex flex-col w-full md:w-1/2 bg-gray-50 justify-center items-center p-8">
         <div className="bg-white p-8 rounded-xl shadow-lg w-full max-w-md flex flex-col items-center">
           <img src={logo} alt="Logo" className="w-48 h-auto max-h-40 mb-6 object-scale-down" />
-          <h1 className="text-3xl font-semibold text-[#081A4B] mb-6">Log in to your account</h1>
+          <h1 className="text-3xl font-semibold text-[#081A4B] mb-6">{loginRoleText}</h1>
           <form onSubmit={handleLogin} className="space-y-4 w-full">
             <div className="relative">
               <FaUser className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />

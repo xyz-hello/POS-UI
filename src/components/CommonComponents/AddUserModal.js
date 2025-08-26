@@ -4,7 +4,7 @@ import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import { showSuccessToast, showErrorToast, showWarnToast } from '../../utils/toast';
 
 // Roles must match backend allowed roles (no Admin or SuperAdmin here)
-const ROLES = ['Cashier', 'Manager'];
+const ROLES = ['Cashier', 'Baker'];
 
 // Email and password validation regex helpers
 const isValidEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);

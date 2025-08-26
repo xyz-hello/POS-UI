@@ -12,25 +12,18 @@ export default function POSLogin({ setIsLoggedIn }) {
     const [showPassword, setShowPassword] = useState(false);
     const navigate = useNavigate();
 
+    // Handles login logic and navigation
     const handleLogin = async () => {
         try {
+            // Example API call for login
             const response = await api.post("/auth/login", { username, password });
-            const { token, user } = response.data;
-
-            if (!token || !user) return toast.error("Invalid credentials");
-
-            const roleMap = { 0: "superadmin", 1: "admin", 2: "cashier" };
-            const role = roleMap[user.user_type] || null;
-            if (!role) return toast.error("Unknown role");
-            if (role !== "cashier") return toast.error("This page is for cashiers only.");
-
-            localStorage.setItem("token", token);
-            localStorage.setItem("isLoggedIn", "true");
-            localStorage.setItem("user", JSON.stringify(user));
-            localStorage.setItem("role", role);
-
+            const { role } = response.data;
             setIsLoggedIn(true);
-            navigate("/dashboard");
+
+            //navigate based on role
+            if (role === "superadmin") { navigate("/superadmin/dashboard"); }
+            else if (role === "admin") { navigate("/admin/dashboard"); }
+            else navigate("/dashboard"); //cashier/baker
         } catch (error) {
             toast.error("Login failed: " + (error.response?.data?.message || error.message));
         }
