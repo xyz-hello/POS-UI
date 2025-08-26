@@ -60,10 +60,14 @@ export default function POSLogin({ setIsLoggedIn }) {
                                 className="peer w-full pl-10 pr-4 py-3 rounded-lg border border-gray-300 text-gray-800 
                   focus:outline-none focus:ring-2 focus:ring-green-400 transition"
                             />
-                            <label className="absolute left-10 top-1/2 -translate-y-1/2 text-gray-400 text-sm
-                peer-placeholder-shown:top-1/2 peer-placeholder-shown:text-base peer-focus:-top-2 peer-focus:text-sm peer-focus:text-green-400">
+                            <label
+                                className={`absolute left-10 text-gray-400 text-sm transition-all
+    ${username ? "-top-2 text-sm text-green-400" : "top-1/2 text-base"} 
+    -translate-y-1/2 peer-focus:-top-2 peer-focus:text-sm peer-focus:text-green-400`}
+                            >
                                 Username
                             </label>
+
                             <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
                                 <FaUser />
                             </span>
@@ -79,10 +83,14 @@ export default function POSLogin({ setIsLoggedIn }) {
                                 className="peer w-full pl-10 pr-10 py-3 rounded-lg border border-gray-300 text-gray-800 
                   focus:outline-none focus:ring-2 focus:ring-green-400 transition"
                             />
-                            <label className="absolute left-10 top-1/2 -translate-y-1/2 text-gray-400 text-sm
-                peer-placeholder-shown:top-1/2 peer-placeholder-shown:text-base peer-focus:-top-2 peer-focus:text-sm peer-focus:text-green-400">
+                            <label
+                                className={`absolute left-10 text-gray-400 text-sm transition-all
+    ${password ? "-top-2 text-sm text-green-400" : "top-1/2 text-base"} 
+    -translate-y-1/2 peer-focus:-top-2 peer-focus:text-sm peer-focus:text-green-400`}
+                            >
                                 Password
                             </label>
+
                             <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
                                 <FaLock />
                             </span>
