@@ -1,16 +1,14 @@
-import React from 'react';
-import { BellIcon, MagnifyingGlassCircleIcon, UserIcon } from '@heroicons/react/24/outline';
+import React from "react";
+import { BellIcon, MagnifyingGlassCircleIcon, UserIcon } from "@heroicons/react/24/outline";
 
 export default function Header() {
-    // Get logged-in user from localStorage
-    const user = JSON.parse(localStorage.getItem('user'));
+    const user = JSON.parse(localStorage.getItem("user"));
     const displayName = user?.username || "User";
 
     return (
-        <header className="w-full flex flex-wrap justify-between items-center p-4 sm:p-5 bg-white border-b border-gray-200 fixed top-0 left-0 z-50">
-
-            {/* Search input - centered */}
-            <div className="flex-1 flex justify-center order-2 sm:order-1 mt-3 sm:mt-0 w-full sm:w-auto">
+        <header className="w-full flex justify-between items-center p-4 sm:p-5 bg-white border-b border-gray-200 fixed top-0 left-0 z-50 h-16">
+            {/* Search */}
+            <div className="flex-1 flex justify-center mt-3 sm:mt-0">
                 <div className="w-full max-w-xl relative px-4 sm:px-0">
                     <MagnifyingGlassCircleIcon className="w-5 h-5 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
                     <input
@@ -21,16 +19,13 @@ export default function Header() {
                 </div>
             </div>
 
-            {/* Right section: notifications + avatar */}
-            <div className="flex items-center gap-3 order-1 sm:order-2">
-
-                {/* Notification bell */}
+            {/* Notifications & user */}
+            <div className="flex items-center gap-3">
                 <button className="relative p-2 rounded-full hover:bg-brandGreenLight/30 transition">
                     <BellIcon className="w-6 h-6 text-neutralDark" />
                     <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-red-500"></span>
                 </button>
 
-                {/* Person icon avatar + name */}
                 <div className="flex items-center gap-2 cursor-pointer p-1 rounded-full hover:bg-brandGreenLight/30 transition">
                     <div className="w-8 h-8 flex items-center justify-center rounded-full bg-white border-2 border-neutralDark">
                         <UserIcon className="w-5 h-5 text-neutralDark filter grayscale" />
