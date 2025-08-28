@@ -8,15 +8,16 @@ const ProtectedRoute = ({ children, allowedRoles = [] }) => {
     const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
     const userRole = (localStorage.getItem('role') || '').toLowerCase();
 
-    const allowedRolesLower = allowedRoles.map(role => role.toLowerCase());
+    // Normalize allowed roles
+    const allowedRolesLower = allowedRoles.map((role) => role.toLowerCase());
 
     if (!isLoggedIn) {
-        // Not logged in, redirect to login page
-        return <Navigate to="/" replace state={{ from: location }} />;
+        // Not logged in → redirect to login
+        return <Navigate to="/login" replace state={{ from: location }} />;
     }
 
     if (allowedRoles.length && !allowedRolesLower.includes(userRole)) {
-        // Logged in but role is unauthorized
+        // Logged in but role not allowed
         return (
             <div className="flex flex-col items-center justify-center h-screen p-4 text-center">
                 <h1 className="text-3xl font-semibold mb-4 text-red-600">Access Denied</h1>
@@ -24,7 +25,7 @@ const ProtectedRoute = ({ children, allowedRoles = [] }) => {
                 <button
                     onClick={() => {
                         localStorage.clear();
-                        window.location.href = '/';
+                        window.location.href = '/login';
                     }}
                     className="px-4 py-2 bg-[#081A4B] text-white rounded-md hover:bg-[#061533]"
                 >
@@ -34,7 +35,7 @@ const ProtectedRoute = ({ children, allowedRoles = [] }) => {
         );
     }
 
-    // Authorized, render children (the page)
+    // Authorized → render children
     return children;
 };
 

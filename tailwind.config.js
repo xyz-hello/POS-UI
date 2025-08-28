@@ -4,19 +4,20 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        // Primary brand colors
+        // SA/DA brand colors 
         primaryNavy: '#081A4B',
         primaryHover: '#061533',
         primaryLight: '#EFF3FB',
 
-        // Green palette based on bg-green-500
-        brandGreen: '#22c55e',       // main green
-        brandGreenDark: '#15803d',   // hover/active
-        brandGreenLight: '#4ade80',  // lighter accents
+        // POS semantic colors – minimalist light palette
+        brandGreen: '#15803d',      // only green, used sparingly for buttons/icons/highlights
 
-        // Optional neutral colors
-        neutralLight: '#f9fafb',     // background
-        neutralDark: '#1f2937',      // text
+        neutralDark: '#111827',     // primary text, dark gray
+        neutralGray: '#6b7280',     // secondary/muted text
+        neutralLight: '#f9fafb',    // main background, light/airy
+        neutralCard: '#ffffff',     // card/panel background
+        neutralHover: '#f3f4f6',    // hover states
+        neutralBorder: '#e5e7eb',   // subtle borders/dividers
       },
 
       // Animation for login card
@@ -31,5 +32,6 @@ module.exports = {
       },
     },
   },
+
   plugins: [],
 };

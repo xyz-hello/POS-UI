@@ -1,6 +1,6 @@
 import React from 'react';
-import BarcodeInput from './BarcodeInput';
-import CustomWeightInput from './CustomWeightInput';
+import BarcodeInput from '../MiddlePanel/BarcodeInput';
+import CustomWeightInput from '../MiddlePanel/CustomWeightInput';
 
 export default function TopInputs({ barcode, setBarcode, onEnter, weight, setWeight }) {
     return (

@@ -1,8 +1,8 @@
 import React, { useState } from "react";
-import Sidebar from "../components/Sidebar";
-import Header from "../components/Header";
-import MiddlePanel from "../components/MiddlePanel/MiddlePanel";
-import OrderLinePreview from "../components/Cart/OrderLinePreview";
+import Sidebar from "../components/layouts/Sidebar";
+import Header from "../components/layouts/Header";
+import MiddlePanel from "../components/layouts/MiddlePanel/MiddlePanel";
+import OrderLinePreview from "../components/cart/OrderLinePreview";
 
 export default function POSDashboard() {
     const [activeMenu, setActiveMenu] = useState("Dashboard");

@@ -5,9 +5,7 @@ import { Home, Clipboard, Table, User, HelpCircle, LogOut, Settings } from "luci
 export default function Sidebar({ collapsed, setCollapsed, isMobile }) {
     const [active, setActive] = React.useState("Dashboard"); // Track active menu item
 
-    // ------------------------------
     // Top / Primary Menu
-    // ------------------------------
     const primaryMenu = [
         { name: "Dashboard", icon: Home },
         { name: "Order Line", icon: Clipboard },
@@ -15,18 +13,14 @@ export default function Sidebar({ collapsed, setCollapsed, isMobile }) {
         { name: "Customers", icon: User },
     ];
 
-    // ------------------------------
     // Bottom / Secondary Menu
-    // ------------------------------
     const secondaryMenu = [
         { name: "Help Center", icon: HelpCircle },
         { name: "Settings", icon: Settings },
         { name: "Logout", icon: LogOut },
     ];
 
-    // ------------------------------
     // Render a single menu item
-    // ------------------------------
     const renderMenuItem = (item) => {
         const Icon = item.icon;
         const isActive = active === item.name;
@@ -36,10 +30,16 @@ export default function Sidebar({ collapsed, setCollapsed, isMobile }) {
                 key={item.name}
                 onClick={() => setActive(item.name)}
                 className={`w-full flex items-center px-4 sm:px-6 py-2 sm:py-3 rounded-lg transition-colors
-          ${isActive ? "bg-brandGreenDark text-white" : "hover:bg-brandGreenLight/50 text-neutralDark"}`}
+          ${isActive
+                        ? "bg-brandGreen text-white"
+                        : "hover:bg-neutralHover text-neutralDark"} // inactive item: neutral hover, dark text
+        `}
             >
-                <Icon size={20} className="mr-3" />
-                {!collapsed && <span className="font-medium text-base">{item.name}</span>}
+                <Icon
+                    size={20}
+                    className={`${isActive ? "text-white" : "text-neutralGray"}`}
+                />
+                {!collapsed && <span className="font-medium text-base ml-3">{item.name}</span>}
             </button>
         );
     };
@@ -47,7 +47,7 @@ export default function Sidebar({ collapsed, setCollapsed, isMobile }) {
     return (
         <div
             className={`h-screen flex flex-col justify-between transition-all duration-300 overflow-auto
-        ${collapsed ? "w-16" : "w-64"} bg-white shadow-md
+        ${collapsed ? "w-16" : "w-64"} bg-neutralCard shadow-sm
         ${isMobile ? "fixed top-0 left-0 z-50" : "relative"}`}
             style={{ paddingTop: "6rem" }} // Offset for fixed header
         >
@@ -56,7 +56,7 @@ export default function Sidebar({ collapsed, setCollapsed, isMobile }) {
                 <div className="p-2 flex justify-end">
                     <button
                         onClick={() => setCollapsed(!collapsed)}
-                        className="p-2 bg-brandGreenLight rounded-full hover:bg-brandGreen/80 transition"
+                        className="p-2 bg-brandGreen rounded-full hover:bg-brandGreenLight/50 transition text-white"
                     >
                         {collapsed ? "→" : "←"}
                     </button>
@@ -69,7 +69,7 @@ export default function Sidebar({ collapsed, setCollapsed, isMobile }) {
             </nav>
 
             {/* Divider / spacing */}
-            {!collapsed && <div className="border-t border-gray-200 mx-4 my-2"></div>}
+            {!collapsed && <div className="border-t border-neutralBorder mx-4 my-2"></div>}
 
             {/* Bottom / Secondary Menu */}
             <div className="px-2 sm:px-4 pb-4 flex flex-col gap-2">

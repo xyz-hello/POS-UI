@@ -5,7 +5,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import Login from './pages/Login';
 import SuperAdminDashboard from './superadmin/Dashboard';
 import AdminDashboard from './admin/Dashboard';
-import POSLogin from './pages/POS/Login';
+import POSLogin from './clients/POS/pages/Login';
 import POSDashboard from './clients/POS/pages/Dashboard';
 import ProtectedRoute from './components/ProtectedRoute';
 
@@ -43,15 +43,17 @@ function App() {
         <Route path="/admin/login" element={<Login role="admin" setIsLoggedIn={setIsLoggedIn} />} />
         <Route path="/superadmin/login" element={<Login role="superadmin" setIsLoggedIn={setIsLoggedIn} />} />
 
-        {/* Protected routes */}
+        {/* Protected POS routes */}
         <Route
           path="/dashboard"
           element={
-            <ProtectedRoute allowedRoles={['cashier']}>
+            <ProtectedRoute allowedRoles={['cashier', 'baker']}>
               <POSDashboard setIsLoggedIn={setIsLoggedIn} />
             </ProtectedRoute>
           }
         />
+
+        {/* Admin routes */}
         <Route
           path="/admin/dashboard"
           element={
@@ -60,6 +62,8 @@ function App() {
             </ProtectedRoute>
           }
         />
+
+        {/* Superadmin routes */}
         <Route
           path="/superadmin/dashboard"
           element={
