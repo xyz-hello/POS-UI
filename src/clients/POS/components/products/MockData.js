@@ -1,22 +1,10 @@
 export const mockProducts = [
-    { id: 1, name: "Ensaymada", price: 25, stock: 50, plu: "1001", soldByWeight: false },
-    { id: 2, name: "Pandesal", price: 5, stock: 100, plu: "1002", soldByWeight: false },
-    { id: 3, name: "Chocolate Cake", price: 500, stock: 10, plu: "2001", soldByWeight: true },
-    { id: 4, name: "Dozen Pandesal", price: 50, stock: 20, plu: "1012", soldByWeight: false },
-    { id: 5, name: "Dozen Pandesal", price: 50, stock: 20, plu: "1012", soldByWeight: false },
-    { id: 5, name: "Dozen Pandesal", price: 50, stock: 20, plu: "1012", soldByWeight: false },
-    { id: 6, name: "Dozen Pandesal", price: 50, stock: 20, plu: "1012", soldByWeight: false },
-    { id: 7, name: "Dozen Pandesal", price: 50, stock: 20, plu: "1012", soldByWeight: false },
-    { id: 8, name: "Dozen Pandesal", price: 50, stock: 20, plu: "1012", soldByWeight: false },
-    { id: 9, name: "Dozen Pandesal", price: 50, stock: 20, plu: "1012", soldByWeight: false },
-    { id: 10, name: "Dozen Pandesal", price: 50, stock: 20, plu: "1012", soldByWeight: false },
-    { id: 11, name: "Dozen Pandesal", price: 50, stock: 20, plu: "1012", soldByWeight: false },
-    { id: 12, name: "Dozen Pandesal", price: 50, stock: 20, plu: "1012", soldByWeight: false },
-    { id: 13, name: "Dozen Pandesal", price: 50, stock: 20, plu: "1012", soldByWeight: false },
-    { id: 14, name: "Dozen Pandesal", price: 50, stock: 20, plu: "1012", soldByWeight: false },
+    { id: 1, name: "Chocolate Croissant", category: "Pastries", price: 50, plu: "1001" },
+    { id: 2, name: "Baguette", category: "Breads", price: 35, plu: "1002" },
+    { id: 3, name: "Blueberry Muffin", category: "Pastries", price: 45, plu: "1003" },
+    { id: 4, name: "Sourdough Loaf", category: "Breads", price: 60, plu: "1004" },
+    { id: 5, name: "Cinnamon Roll", category: "Pastries", price: 55, plu: "1005" },
+    { id: 6, name: "Bagel", category: "Breads", price: 30, plu: "1006" },
+    { id: 7, name: "Almond Danish", category: "Pastries", price: 65, plu: "1007" },
+    { id: 8, name: "Whole Wheat Bread", category: "Breads", price: 40, plu: "1008" }
 ];
-
-
-
-//12SAMPLE PRODUCT ONLY
-//replace mockProducts with real API late12
