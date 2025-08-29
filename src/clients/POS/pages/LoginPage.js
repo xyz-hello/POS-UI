@@ -4,7 +4,7 @@ import { toast } from "react-toastify";
 import api from "../../../services/axiosInstance";
 import { FaUser, FaLock, FaEye, FaEyeSlash } from "react-icons/fa";
 import Lottie from "lottie-react";
-import posAnimation from "../../POS/assets/animations/pos-machine.json";
+import posAnimation from "../assets/animations/pos-machine.json";
 
 export default function POSLogin({ setIsLoggedIn }) {
     const [username, setUsername] = useState("");

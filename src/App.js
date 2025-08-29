@@ -2,12 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import Login from './pages/Login';
+import Login from './pages/LoginPage';
 import SuperAdminDashboard from './superadmin/Dashboard';
 import AdminDashboard from './admin/Dashboard';
-import POSLogin from './clients/POS/pages/Login';
-import POSDashboard from './clients/POS/pages/Dashboard';
+import POSLogin from './clients/POS/pages/LoginPage';
+import POSDashboard from './clients/POS/pages/DashboardPage';
 import ProtectedRoute from './components/ProtectedRoute';
+import { CartProvider } from './clients/POS/components/contexts/cartContext';
+
 
 function App() {
   // Initialize login state from localStorage once
@@ -48,11 +50,12 @@ function App() {
           path="/dashboard"
           element={
             <ProtectedRoute allowedRoles={['cashier', 'baker']}>
-              <POSDashboard setIsLoggedIn={setIsLoggedIn} />
+              <CartProvider>
+                <POSDashboard setIsLoggedIn={setIsLoggedIn} />
+              </CartProvider>
             </ProtectedRoute>
           }
         />
-
         {/* Admin routes */}
         <Route
           path="/admin/dashboard"

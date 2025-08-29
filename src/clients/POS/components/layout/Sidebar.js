@@ -1,4 +1,3 @@
-// Sidebar.js
 import React from "react";
 import { Home, Clipboard, Table, User, HelpCircle, LogOut, Settings } from "lucide-react";
 
