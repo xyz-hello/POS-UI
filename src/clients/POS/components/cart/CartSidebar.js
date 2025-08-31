@@ -1,7 +1,7 @@
-// src/clients/POS/components/cart/CartSidebar.js
 import React from "react";
 import { useCart } from "../contexts/cartContext"; // hook to access cart state
 import { formatPrice } from "../../utils/FormatPrice"; // shared utility for price formatting
+
 
 export default function CartSidebar() {
     const { cart, removeFromCart } = useCart();

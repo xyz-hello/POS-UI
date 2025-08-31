@@ -1,9 +1,11 @@
 import React, { useState, useEffect, useRef } from "react";
 import { formatPrice } from "../../utils/FormatPrice";
+import { useCart } from "../contexts/cartContext";
 
 export default function ProductCard({ product }) {
     const [selected, setSelected] = useState(false);
     const cardRef = useRef(null);
+    const { addToCart } = useCart();
 
     // Deselect if click outside
     useEffect(() => {
@@ -17,6 +19,11 @@ export default function ProductCard({ product }) {
             document.removeEventListener("mousedown", handleClickOutside);
         };
     }, []);
+
+    const handleAddToCart = () => {
+        addToCart(product);
+        setSelected(true);
+    };
 
     return (
         <div
@@ -43,7 +50,7 @@ export default function ProductCard({ product }) {
 
             {/* Add Button */}
             <button
-                onClick={() => setSelected(true)} // only allow single selection
+                onClick={handleAddToCart}
                 className={`mt-3 w-full py-2 rounded-full bg-brandGreen text-white text-sm font-medium
                             hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-brandGreen transition-colors`}
             >
