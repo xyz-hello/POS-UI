@@ -8,3 +8,5 @@ export const mockProducts = [
     { id: 7, name: "Almond Danish", category: "Pastries", price: 65, plu: "1007" },
     { id: 8, name: "Whole Wheat Bread", category: "Breads", price: 40, plu: "1008" }
 ];
+
+//TEMPORARY ONLY
