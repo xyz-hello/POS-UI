@@ -21,11 +21,13 @@ export default function ProductCard({ product }) {
     return (
         <div
             ref={cardRef}
-            className={`p-3 rounded-xl shadow-sm flex flex-col items-center cursor-pointer transition-transform duration-200 hover:scale-105
-                ${selected ? "ring-2 ring-brandGreen" : ""}`}
+            className={`p-3 rounded-xl bg-white border border-gray-200 shadow-sm 
+                        flex flex-col items-center cursor-pointer 
+                        transition-transform duration-200 hover:scale-105
+                        ${selected ? "ring-2 ring-brandGreen" : ""}`}
         >
             {/* Product Image with Price Badge */}
-            <div className="relative w-full mb-3">
+            <div className="relative w-full mb-3 bg-gray-50 rounded-lg p-2">
                 <img
                     src={product.image}
                     alt={product.name}
@@ -43,7 +45,7 @@ export default function ProductCard({ product }) {
             <button
                 onClick={() => setSelected(true)} // only allow single selection
                 className={`mt-3 w-full py-2 rounded-full bg-brandGreen text-white text-sm font-medium
-                    hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-brandGreen transition-colors`}
+                            hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-brandGreen transition-colors`}
             >
                 Add
             </button>
