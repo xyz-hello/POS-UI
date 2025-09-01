@@ -22,7 +22,7 @@ export default function PaymentMethod({ selectedMethod, onSelect }) {
                         onClick={() => onSelect(method.key)}
                         className={`flex-1 py-1.5 rounded-lg font-medium border text-xs transition-colors
                             ${selectedMethod === method.key
-                                ? "bg-green-500 text-white border-green-500"
+                                ? "bg-white text-brandGreen border-brandGreen" // outline-only when selected
                                 : "bg-gray-100 text-gray-700 border-gray-300 hover:bg-gray-200"
                             }
                         `}

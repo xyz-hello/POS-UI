@@ -83,17 +83,16 @@ export default function CartSidebar() {
                     <PaymentSummary subtotal={subtotal} discount={discount} />
                 </div>
 
-                <div className="px-4 py-3">
-                    <PaymentPanel
-                        total={total}
-                        onPay={handlePayTransaction}
-                        // Pass className for pills/buttons
-                        quickCashClassName={`flex-1 py-2 px-4 rounded-full font-semibold text-sm
-                            bg-white text-brandGreen border-2 border-brandGreen
-                            hover:bg-green-50 focus:ring-2 focus:ring-brandGreen
-                            transition-colors`}
-                    />
-                </div>
+                <PaymentPanel
+                    total={total}
+                    onPay={handlePayTransaction}
+                    // Pass className for pills/buttons
+                    quickCashClassName={`flex-1 py-2 px-4 rounded-full font-semibold text-sm
+        bg-white text-brandGreen border-2 border-brandGreen
+        hover:bg-green-50 focus:ring-2 focus:ring-brandGreen
+        transition-colors`}
+                />
+
             </div>
 
             {/* Modals */}
