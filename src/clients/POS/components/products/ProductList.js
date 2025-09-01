@@ -1,4 +1,3 @@
-// src/components/products/ProductList.js
 import React, { useState, useEffect, useMemo } from "react";
 import ProductCard from "./ProductCard";
 import { mockProducts } from "./MockData";

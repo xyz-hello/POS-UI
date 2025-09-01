@@ -1,4 +1,3 @@
-// src/components/products/CategoryTabs.js
 import React from "react";
 
 export default function CategoryTabs({ categories, selectedCategory, onSelectCategory }) {
