@@ -12,6 +12,7 @@ export default function CartSidebar() {
     const [editItem, setEditItem] = useState(null);
     const [deleteItem, setDeleteItem] = useState(null);
 
+    // Calculate subtotal and total
     const subtotal = useMemo(
         () => cart.reduce((sum, item) => sum + item.price * item.qty, 0),
         [cart]
@@ -19,42 +20,38 @@ export default function CartSidebar() {
     const discount = 0;
     const total = subtotal - discount;
 
+    // Handle payment
     const handlePayTransaction = ({ method, amount }) => {
         console.log("Payment Info:", { method, amount });
         alert(`Paid ${formatPrice(amount)} via ${method}`);
     };
 
     return (
-        <aside
-            className="w-72 bg-white rounded-xl shadow-md flex flex-col
-                       max-h-[calc(100vh-1rem)] mt-2"
-        >
+        <aside className="w-72 bg-white rounded-xl shadow-md flex flex-col h-full mt-4 overflow-hidden">
             {/* Header */}
-            <div className="px-4 py-3 border-b border-gray-200 flex-shrink-0">
+            <div className="px-4 py-2 border-b border-gray-200 flex-shrink-0">
                 <h2 className="text-lg font-semibold text-gray-800">Order #12345</h2>
-                <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mt-1">
+                <p className="text-xs text-gray-500 mt-0.5 uppercase tracking-wide">
                     Ordered Items
                 </p>
             </div>
 
-            {/* Cart Items (scrollable) */}
-            <div className="flex-1 overflow-y-auto px-4 py-2 min-h-0">
+            {/* Cart items scrollable */}
+            <div className="flex-1 overflow-y-auto px-4 py-2 space-y-1">
                 {cart.length === 0 ? (
-                    <p className="text-gray-400 text-sm mt-3 text-center">
-                        Cart is empty
-                    </p>
+                    <p className="text-center text-gray-400 text-sm mt-2">Cart is empty</p>
                 ) : (
                     cart.map((item) => (
                         <div
                             key={`${item.id}-${item.weight || "unit"}`}
-                            className="flex items-center justify-between py-2 border-b border-gray-100 last:border-none"
+                            className="flex justify-between items-center py-1.5 border-b border-gray-100 last:border-none"
                         >
-                            <div className="flex-1 pr-2">
-                                <p className="text-sm text-gray-700 leading-tight">
-                                    {item.qty}× {item.name}
-                                </p>
-                            </div>
+                            {/* Product info */}
+                            <p className="text-sm text-gray-700 truncate">
+                                {item.qty}× {item.name}
+                            </p>
 
+                            {/* Price + actions */}
                             <div className="flex items-center space-x-1">
                                 <p className="text-sm font-semibold text-gray-900">
                                     {formatPrice(item.price * item.qty)}
@@ -77,30 +74,17 @@ export default function CartSidebar() {
                 )}
             </div>
 
-            {/* Sticky Footer */}
-            <div className="flex-shrink-0 border-t border-gray-200 bg-white">
-                <div className="px-4 py-2">
-                    <PaymentSummary subtotal={subtotal} discount={discount} />
+            {/* Footer - sticky at bottom with rounded corners */}
+            <div className="flex-shrink-0 border-t border-gray-200 bg-white px-4 py-3 rounded-b-xl">
+                <PaymentSummary subtotal={subtotal} discount={discount} />
+                <div className="mt-2">
+                    <PaymentPanel total={total} onPay={handlePayTransaction} />
                 </div>
-
-                <PaymentPanel
-                    total={total}
-                    onPay={handlePayTransaction}
-                    // Pass className for pills/buttons
-                    quickCashClassName={`flex-1 py-2 px-4 rounded-full font-semibold text-sm
-        bg-white text-brandGreen border-2 border-brandGreen
-        hover:bg-green-50 focus:ring-2 focus:ring-brandGreen
-        transition-colors`}
-                />
-
             </div>
 
             {/* Modals */}
             {editItem && (
-                <EditCartItemModal
-                    item={editItem}
-                    onClose={() => setEditItem(null)}
-                />
+                <EditCartItemModal item={editItem} onClose={() => setEditItem(null)} />
             )}
             {deleteItem && (
                 <ConfirmationModal

@@ -8,7 +8,7 @@ export default function PaymentMethod({ selectedMethod, onSelect }) {
     ];
 
     return (
-        <div className="bg-white rounded-2xl shadow-sm border p-4">
+        <div className="bg-white rounded-2xl shadow-sm border-gray-200 shadow-sm  p-4">
             {/* Section Label */}
             <h3 className="text-sm font-semibold text-gray-600 mb-3">
                 Payment Method

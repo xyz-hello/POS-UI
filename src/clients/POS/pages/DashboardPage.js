@@ -12,30 +12,22 @@ export default function Dashboard() {
 
             {/* Main Content Area */}
             <div className="flex flex-col flex-1">
-                {/* Header */}
+                {/* Header (fixed height, stays on top) */}
                 <Header />
 
                 {/* Content + Cart */}
-                <div className="flex flex-1 overflow-hidden pt-16 px-6 pb-6 gap-6">
-
-                    {/* Product List */}
+                <div className="flex flex-1 gap-6 px-6 pb-6 pt-16 overflow-hidden">
+                    {/* Product List (scrollable) */}
                     <main className="flex-1 overflow-y-auto">
                         <ProductList />
                     </main>
 
-                    {/* Cart Sidebar */}
-                    <div className="mt-4">
+                    {/* Cart Sidebar (fixed width, full height of remaining space) */}
+                    <aside className="w-72 flex flex-col">
                         <CartSidebar />
-                    </div>
+                    </aside>
                 </div>
             </div>
         </div>
     );
 }
-
-//reminder
-// GET /products → replace mock product list.
-// POST /cart → add item.
-// PUT /cart/:id → update quantity.
-// DELETE /cart/:id → remove item.
-// GET /orders/:id → replace Order #12345
