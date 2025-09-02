@@ -1,9 +1,11 @@
 import React, { useState, useEffect, useRef } from "react";
 import { formatPrice } from "../../utils/FormatPrice";
 import { useCart } from "../contexts/cartContext";
+import { motion, AnimatePresence } from "framer-motion";
 
 export default function ProductCard({ product }) {
-    const [selected, setSelected] = useState(false);
+    const [selected, setSelected] = useState(false); //existing highlight state
+    const [added, setAdded] = useState(false); //animation state
     const cardRef = useRef(null);
     const { addToCart } = useCart();
 
@@ -15,14 +17,16 @@ export default function ProductCard({ product }) {
             }
         };
         document.addEventListener("mousedown", handleClickOutside);
-        return () => {
-            document.removeEventListener("mousedown", handleClickOutside);
-        };
+        return () => document.removeEventListener("mousedown", handleClickOutside);
     }, []);
 
     const handleAddToCart = () => {
-        addToCart(product);
-        setSelected(true);
+        addToCart(product); // existing cart logic
+        setSelected(true);   // existing highlight
+        setAdded(true);      // trigger animation
+
+        // Reset animation after 1s
+        setTimeout(() => setAdded(false), 1000);
     };
 
     return (
@@ -37,12 +41,26 @@ export default function ProductCard({ product }) {
             <div className="relative w-full mb-3 bg-gray-50 rounded-lg p-2">
                 <img
                     src={product.image}
-                    alt={product.name}
+                    alt=""
                     className="w-full h-28 object-cover rounded-lg"
                 />
                 <span className="absolute top-2 right-2 bg-brandGreen text-white text-xs font-semibold px-2 py-1 rounded-lg shadow">
                     {formatPrice(product.price)}
                 </span>
+
+                {/* Added Animation */}
+                <AnimatePresence>
+                    {added && (
+                        <motion.span
+                            initial={{ opacity: 0, y: 10, scale: 0.8 }}
+                            animate={{ opacity: 1, y: -20, scale: 1 }}
+                            exit={{ opacity: 0, y: -30, scale: 0.5 }}
+                            className="absolute top-2 left-1/2 -translate-x-1/2 bg-brandGreen text-white text-xs font-bold px-2 py-1 rounded-full shadow"
+                        >
+                            Added!
+                        </motion.span>
+                    )}
+                </AnimatePresence>
             </div>
 
             {/* Product Name */}

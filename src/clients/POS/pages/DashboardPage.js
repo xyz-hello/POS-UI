@@ -23,7 +23,7 @@ export default function Dashboard() {
                     </main>
 
                     {/* Cart Sidebar (fixed width, full height of remaining space) */}
-                    <aside className="w-72 flex flex-col">
+                    <aside className="w-72 flex flex-col mt-2">
                         <CartSidebar />
                     </aside>
                 </div>

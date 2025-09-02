@@ -73,7 +73,7 @@ export default function PaymentPanel({ total, onPay }) {
                     value={amountPaid}
                     onChange={handleInputChange}
                     placeholder="Enter amount received"
-                    className="w-full py-2 px-3 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-400 text-sm"
+                    className="w-full py-2 px-3 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-brandGreen text-sm"
                 />
             )}
 
