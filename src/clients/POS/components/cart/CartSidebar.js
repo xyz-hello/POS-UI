@@ -27,7 +27,7 @@ export default function CartSidebar() {
     };
 
     return (
-        <aside className="w-72 bg-white rounded-xl shadow-md flex flex-col h-full mt-4 overflow-hidden">
+        <aside className="w-72 bg-white rounded-xl shadow-md flex flex-col h-full mt-4overflow-hidden">
             {/* Header */}
             <div className="px-4 py-2 border-b border-gray-200 flex-shrink-0">
                 <h2 className="text-lg font-semibold text-gray-800">Order #12345</h2>
