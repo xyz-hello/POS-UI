@@ -17,13 +17,13 @@ export default function Sidebar({ collapsed, setCollapsed, isMobile }) {
     const [showLogoutModal, setShowLogoutModal] = useState(false); // For logout modal
     const navigate = useNavigate();
 
-    // Bakery POS: Cashier/Admin essentials
+    // Bakery POS essentials
     const primaryMenu = [
         { name: "Dashboard", icon: Home },
-        { name: "New Sale", icon: ShoppingCart }, // Main POS screen
-        { name: "Products", icon: Package }, // Bread & pastries catalog
-        { name: "Customers", icon: User }, // Optional loyalty program
-        { name: "Reports", icon: BarChart2 }, // Sales overview
+        { name: "New Sale", icon: ShoppingCart },
+        { name: "Products", icon: Package },
+        { name: "Customers", icon: User },
+        { name: "Reports", icon: BarChart2 },
     ];
 
     const secondaryMenu = [
@@ -32,6 +32,7 @@ export default function Sidebar({ collapsed, setCollapsed, isMobile }) {
         { name: "Logout", icon: LogOut },
     ];
 
+    // Logout handler
     const handleLogout = useCallback(() => {
         const user = JSON.parse(localStorage.getItem("user"));
         localStorage.removeItem("token");
@@ -44,6 +45,7 @@ export default function Sidebar({ collapsed, setCollapsed, isMobile }) {
         else navigate("/login");
     }, [navigate]);
 
+    // Render menu items
     const renderMenuItem = (item) => {
         const Icon = item.icon;
         const isActive = active === item.name;
@@ -53,7 +55,7 @@ export default function Sidebar({ collapsed, setCollapsed, isMobile }) {
                 setShowLogoutModal(true);
             } else {
                 setActive(item.name);
-                // TODO: later -> navigate(`/pos/${item.name.toLowerCase()}`);
+                // TODO: navigate(`/pos/${item.name.toLowerCase()}`);
             }
         };
 
@@ -86,7 +88,7 @@ export default function Sidebar({ collapsed, setCollapsed, isMobile }) {
                     ${isMobile ? "fixed top-0 left-0 z-50" : "relative"}`}
                 style={{ paddingTop: "6rem" }} // offset for fixed header
             >
-                {/* Toggle button (mobile only) */}
+                {/* Mobile toggle */}
                 {isMobile && (
                     <div className="p-2 flex justify-end">
                         <button
@@ -109,9 +111,16 @@ export default function Sidebar({ collapsed, setCollapsed, isMobile }) {
                 )}
 
                 {/* Secondary menu */}
-                <div className="px-2 sm:px-4 pb-4 flex flex-col gap-2">
+                <div className="px-2 sm:px-4 flex flex-col gap-2">
                     {secondaryMenu.map(renderMenuItem)}
                 </div>
+
+                {/* Footer / copyright */}
+                {!collapsed && (
+                    <div className="px-2 sm:px-4 pb-4 mt-4 text-center text-xs text-neutralGray">
+                        © 2025 Zero One
+                    </div>
+                )}
             </div>
 
             {/* Logout modal */}
