@@ -24,7 +24,7 @@ export default function BarcodeInput({ onSearch }) {
     return (
         <form
             onSubmit={handleSubmit}
-            className="mb-4 mt-6 flex items-center gap-2"
+            className="mb-4 mt-6 flex items-center gap-2 ml-6"
         >
             {/* Input with scan icon */}
             <div className="relative w-full max-w-sm">
@@ -41,8 +41,9 @@ export default function BarcodeInput({ onSearch }) {
             {/* Submit button with magnifying glass */}
             <button
                 type="submit"
-                className="flex items-center gap-1 rounded-lg bg-brandGreen px-4 py-2 text-white text-sm font-medium shadow hover:bg-green-600"
-            >
+                className="flex items-center gap-1 px-4 py-2 rounded-lg text-sm font-medium text-brandGreen 
+                            border border-brandGreen bg-white shadow hover:bg-gray-100 
+                             focus:outline-none focus:ring-2 focus:ring-brandGreen transition-colors">
                 <Search className="h-4 w-4" />
                 Search
             </button>
