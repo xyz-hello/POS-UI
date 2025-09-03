@@ -19,11 +19,11 @@ export default function Dashboard() {
                 {/* Content + Cart */}
                 <div className="flex flex-1 gap-6 px-6 pb-6 pt-16 overflow-hidden">
                     {/* Product List (scrollable) */}
-                    <main className="flex-1 overflow-y-auto">
-                        {/* Top Section: Search bar above category tabs */}
+                    <main className="flex-1 overflow-y-auto scrollbar-thin">
+                        {/* Top Section */}
                         <div className="mb-6">
                             <BarcodeInput onSearch={(code) => console.log("Scanned:", code)} />
-                            {/* Add your CategoryTabs here below search bar */}
+                            {/* CategoryTabs */}
                         </div>
 
                         <ProductList />

@@ -31,3 +31,28 @@
     scrollbar-width: thin;
     scrollbar-color: rgba(0, 0, 0, 0.3) transparent;
 }
+
+/* Minimalist scrollbar style */
+.scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+    /* slim */
+    height: 6px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent;
+    /* no background */
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 0, 0, 0.2);
+    /* subtle thumb */
+    border-radius: 9999px;
+    /* fully rounded */
+}
+
+.scrollbar-thin {
+    scrollbar-width: thin;
+    /* Firefox */
+    scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
+}

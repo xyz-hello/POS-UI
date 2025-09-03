@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { mockProducts as MockData } from "../products/MockData";
 import { motion, AnimatePresence } from "framer-motion";
+import WeightInputModal from "../modals/WeightInputModal"; // import modal
 
 export default function QuickAddButtons({ onQuickAdd }) {
     const [quickItems, setQuickItems] = useState([]);
+    const [showModal, setShowModal] = useState(false); // modal state
+    const [activeItem, setActiveItem] = useState(null); // item to pass into modal
 
     useEffect(() => {
         // TEMP: pick first 8 products as Quick Add items
@@ -11,7 +14,20 @@ export default function QuickAddButtons({ onQuickAdd }) {
         setQuickItems(bestSellers);
     }, []);
 
-    // Base button classes with comments
+    const handleClick = (item) => {
+        if (item.soldByWeight) {
+            setActiveItem(item);
+            setShowModal(true);
+        } else {
+            onQuickAdd(item);
+        }
+    };
+
+    const handleConfirmWeight = (itemWithWeight) => {
+        onQuickAdd(itemWithWeight);
+    };
+
+    // Base button classes
     const buttonClasses = `
         px-4 py-3                        // spacing
         rounded-md                        // square/rectangle shape
@@ -26,25 +42,36 @@ export default function QuickAddButtons({ onQuickAdd }) {
     `;
 
     return (
-        <div className="quick-add-buttons grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 mb-4">
-            <AnimatePresence>
-                {quickItems.map((item) => (
-                    <motion.button
-                        key={item.id}
-                        onClick={() => onQuickAdd(item)}  // add to cart
-                        className={buttonClasses}
-                        initial={{ opacity: 0, y: 10 }}   // animate in from below
-                        animate={{ opacity: 1, y: 0 }}    // final position
-                        exit={{ opacity: 0, y: 10 }}      // animate out
-                        whileHover={{ scale: 1.05 }}      // hover lift effect
-                        whileTap={{ scale: 0.95 }}        // tap press effect
-                        layout
-                    >
-                        <span>{item.name}</span>
-                        <span className="text-xs text-gray-500">₱{item.price}</span>
-                    </motion.button>
-                ))}
-            </AnimatePresence>
-        </div>
+        <>
+            <div className="quick-add-buttons grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 mb-4">
+                <AnimatePresence>
+                    {quickItems.map((item) => (
+                        <motion.button
+                            key={item.id}
+                            onClick={() => handleClick(item)}
+                            className={buttonClasses}
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: 10 }}
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                            layout
+                        >
+                            <span>{item.name}</span>
+                            <span className="text-xs text-gray-500">₱{item.price}</span>
+                        </motion.button>
+                    ))}
+                </AnimatePresence>
+            </div>
+
+            {/* Weight Modal */}
+            {showModal && (
+                <WeightInputModal
+                    item={activeItem}
+                    onConfirm={handleConfirmWeight}
+                    onClose={() => setShowModal(false)}
+                />
+            )}
+        </>
     );
 }
