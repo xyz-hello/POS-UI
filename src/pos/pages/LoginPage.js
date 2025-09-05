@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-import api from "../../../services/axiosInstance";
+import api from "../../services/axiosInstance";
 import { FaUser, FaLock, FaEye, FaEyeSlash } from "react-icons/fa";
 import Lottie from "lottie-react";
 import posAnimation from "../assets/animations/pos-machine.json";
