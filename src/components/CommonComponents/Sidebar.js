@@ -1,38 +1,37 @@
 import React, { useState } from "react";
 import { NavLink } from "react-router-dom";
-// import logo from "../../assets/logo.png";
 import {
   HomeIcon,
-  UsersIcon,
-  CubeIcon,        // use this for Products
-  Squares2X2Icon, // use this for Inventory
-  ChartBarIcon,
+  CubeIcon,
+  Squares2X2Icon,
   Cog6ToothIcon,
   Bars3Icon,
   XMarkIcon,
+  PresentationChartBarIcon,
+  DocumentTextIcon
 } from "@heroicons/react/24/outline";
 
-// Define menus for different roles
+// -------------------- Role-based Menu Definition --------------------
 const menuByRole = {
   superadmin: [
-    { name: "Dashboard", to: "/superadmin/dashboard", icon: HomeIcon },
-    { name: "Users", to: "/superadmin/users", icon: UsersIcon },
-    { name: "Reports", to: "/superadmin/reports", icon: ChartBarIcon },
-    { name: "Settings", to: "/superadmin/settings", icon: Cog6ToothIcon },
+    { name: "Dashboard", to: "/superadmin/dashboard", icon: HomeIcon }, // Dashboard only
+    { name: "Settings", to: "/superadmin/settings", icon: Cog6ToothIcon }, // App settings
   ],
   admin: [
-    { name: "Dashboard", to: "/admin/dashboard", icon: HomeIcon },
-    { name: "Products", to: "/admin/products", icon: CubeIcon },       // new tab
-    { name: "Inventory", to: "/admin/inventory", icon: Squares2X2Icon }, // new tab
-    { name: "Settings", to: "/admin/settings", icon: Cog6ToothIcon },
+    { name: "Dashboard", to: "/admin/dashboard", icon: HomeIcon }, // Main dashboard
+    { name: "Products", to: "/admin/products", icon: CubeIcon }, // Add/edit products
+    { name: "Inventory", to: "/admin/inventory", icon: Squares2X2Icon }, // Adjust stock / inventory
+    { name: "Analytics", to: "/admin/analytics", icon: PresentationChartBarIcon }, // Analytics tab
+    { name: "Reports", to: "/admin/reports", icon: DocumentTextIcon }, // Reports tab
+    { name: "Settings", to: "/admin/settings", icon: Cog6ToothIcon }, // App settings
   ],
 };
 
-// Mobile toggle button
+// -------------------- Mobile Header Toggle --------------------
 function MobileHeader({ isOpen, setIsOpen }) {
   return (
     <div className="md:hidden flex items-center justify-between px-4 py-3 bg-white text-gray-800 shadow">
-      {/* <img src={logo} alt="App Logo" className="h-8" /> */}
+      {/* Toggle button for sidebar */}
       <button
         onClick={() => setIsOpen(!isOpen)}
         className="focus:outline-none"
@@ -44,7 +43,7 @@ function MobileHeader({ isOpen, setIsOpen }) {
   );
 }
 
-// Sidebar links
+// -------------------- Sidebar Navigation Links --------------------
 function SidebarLinks({ menuItems, closeSidebar }) {
   return (
     <nav className="flex-1 mt-6 px-4 space-y-2 overflow-y-auto">
@@ -52,7 +51,7 @@ function SidebarLinks({ menuItems, closeSidebar }) {
         <NavLink
           key={name}
           to={to}
-          onClick={closeSidebar}
+          onClick={closeSidebar} // Close sidebar on mobile after click
           className={({ isActive }) =>
             `flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ${isActive
               ? "bg-[#081A4B] text-white shadow-sm font-medium"
@@ -68,7 +67,7 @@ function SidebarLinks({ menuItems, closeSidebar }) {
   );
 }
 
-// Sidebar footer
+// -------------------- Sidebar Footer --------------------
 function SidebarFooter() {
   return (
     <div className="border-t border-gray-200 p-4 text-[#0f1e40] text-xs text-center">
@@ -77,11 +76,11 @@ function SidebarFooter() {
   );
 }
 
-// Main Sidebar component
+// -------------------- Main Sidebar Component --------------------
 export default function Sidebar() {
   const [isOpen, setIsOpen] = useState(false);
 
-  // 🔹 Read role from localStorage (fallback to "admin" if not found)
+  // 🔹 Get user role from localStorage (default to 'admin')
   const role = localStorage.getItem("role") || "admin";
   const menuItems = menuByRole[role] || [];
 
@@ -89,8 +88,10 @@ export default function Sidebar() {
 
   return (
     <>
+      {/* Mobile header toggle */}
       <MobileHeader isOpen={isOpen} setIsOpen={setIsOpen} />
 
+      {/* Sidebar */}
       <aside
         className={`
           fixed top-0 left-0 h-full bg-white text-gray-700 shadow-md
@@ -100,15 +101,16 @@ export default function Sidebar() {
           md:w-64 z-40 flex flex-col
         `}
       >
-        {/* Desktop logo */}
+        {/* Desktop logo / header */}
         <div className="hidden md:flex items-center justify-center h-20 border-b border-gray-200">
+          {/* Optional logo */}
           {/* <img src={logo} alt="App Logo" className="h-30" /> */}
         </div>
 
-        {/* Navigation links */}
+        {/* Sidebar navigation links */}
         <SidebarLinks menuItems={menuItems} closeSidebar={closeSidebar} />
 
-        {/* Footer */}
+        {/* Sidebar footer */}
         <SidebarFooter />
       </aside>
 

@@ -8,6 +8,8 @@ import SuperAdminDashboard from './superadmin/Dashboard';
 import AdminDashboard from './admin/Dashboard';
 import ProductsPage from './admin/ProductList';
 import InventoryPage from './admin/InventoryPage';
+// import AnalyticsPage from './admin/AnalyticsPage';
+// import ReportsPage from './admin/ReportsPage';
 
 import POSLogin from './pos/pages/LoginPage';
 import POSDashboard from './pos/pages/DashboardPage';
@@ -83,6 +85,31 @@ function App() {
             </ProtectedRoute>
           }
         />
+        {/* <Route
+          path="/admin/analytics"
+          element={
+            <ProtectedRoute allowedRoles={['admin']}>
+              <AnalyticsPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/reports"
+          element={
+            <ProtectedRoute allowedRoles={['admin']}>
+              <ReportsPage />
+            </ProtectedRoute>
+          }
+        /> */}
+        <Route
+          path="/admin/settings"
+          element={
+            <ProtectedRoute allowedRoles={['admin']}>
+              {/* Replace with AdminSettingsPage if exists */}
+              <div>Admin Settings Page</div>
+            </ProtectedRoute>
+          }
+        />
 
         {/* Superadmin routes */}
         <Route
@@ -90,6 +117,15 @@ function App() {
           element={
             <ProtectedRoute allowedRoles={['superadmin']}>
               <SuperAdminDashboard setIsLoggedIn={setIsLoggedIn} />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/superadmin/settings"
+          element={
+            <ProtectedRoute allowedRoles={['superadmin']}>
+              {/* Replace with SuperAdminSettingsPage if exists */}
+              <div>Superadmin Settings Page</div>
             </ProtectedRoute>
           }
         />
