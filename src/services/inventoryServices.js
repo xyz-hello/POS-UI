@@ -30,9 +30,11 @@ export const updateInventory = async (productId, quantityChange, token) => {
     if (!token) throw new Error("JWT token missing.");
 
     try {
-        const response = await api.put(`/inventory/${productId}`, { quantityChange }, {
-            headers: { Authorization: `Bearer ${token}` },
-        });
+        const response = await api.put(
+            `/inventory/${productId}`,
+            { quantityChange },
+            { headers: { Authorization: `Bearer ${token}` } }
+        );
 
         return response.data;
     } catch (err) {
