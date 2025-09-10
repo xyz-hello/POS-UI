@@ -8,7 +8,14 @@ export default function Header() {
     return (
         <header className="w-full flex justify-between items-center p-4 sm:p-5 bg-neutralCard border-b border-neutralBorder fixed top-0 left-0 z-50 h-16">
 
-            {/* Search */}
+            {/* Logo / Store Name on the left */}
+            <div className="flex-shrink-0">
+                <h1 className="text-2xl sm:text-3xl font-paypayan text-neutralDark">
+                    Paypayan
+                </h1>
+            </div>
+
+            {/* Search centered */}
             <div className="flex-1 flex justify-center mt-3 sm:mt-0">
                 <div className="w-full max-w-xl relative px-4 sm:px-0">
                     <MagnifyingGlassCircleIcon
@@ -22,18 +29,19 @@ export default function Header() {
                 </div>
             </div>
 
-            {/* Notifications & User */}
+            {/* Notifications & User on the right */}
             <div className="flex items-center gap-3">
                 <button className="relative p-2 rounded-full hover:bg-brandGreenLight/30 transition">
-                    {/* <BellIcon className="w-6 h-6 text-neutralDark" /> */}
-                    {/* <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-red-500"></span> */}
+                    {/* Optional bell icon */}
                 </button>
 
                 <div className="flex items-center gap-2 cursor-pointer p-1 rounded-full hover:bg-brandGreenLight/30 transition">
                     <div className="w-8 h-8 flex items-center justify-center rounded-full bg-neutralLight border-2 border-neutralBorder">
                         <UserIcon className="w-5 h-5 text-neutralGray" />
                     </div>
-                    <span className="text-neutralDark font-medium truncate max-w-[100px]">{displayName}</span>
+                    <span className="text-neutralDark font-medium truncate max-w-[100px]">
+                        {displayName}
+                    </span>
                 </div>
             </div>
         </header>

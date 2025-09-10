@@ -1,17 +1,26 @@
 import React, { useState, useEffect, useRef } from "react";
-import { formatProductPrice } from "../../utils/FormatPrice";
+import { AnimatePresence } from "framer-motion";
 import { useCart } from "../contexts/cartContext";
-import { motion, AnimatePresence } from "framer-motion";
-import WeightInputModal from "../modals/WeightInputModal";
+import { formatProductPrice } from "../../utils/FormatPrice";
+import POSProductImage from "./POSProductImage";
+import PriceBadge from "./PriceBadge";
+import AddedNotification from "./AddedNotification";
+import QuantityControl from "./QuantityControl";
 
-export default function ProductCard({ product }) {
-    const [selected, setSelected] = useState(false); // highlight state
-    const [added, setAdded] = useState(false); // animation state
-    const [showModal, setShowModal] = useState(false); // modal state
+export default function ProductCard({ product, onAddToCart }) {
+    // Track quantity for this product
+    const [quantity, setQuantity] = useState(0);
+
+    // Track card focus state (visual ring effect)
+    const [selected, setSelected] = useState(false);
+
+    // Track whether "Added!" feedback should show
+    const [added, setAdded] = useState(false);
+
     const cardRef = useRef(null);
     const { addToCart } = useCart();
 
-    // Deselect if click outside
+    // Close selection if clicked outside card
     useEffect(() => {
         const handleClickOutside = (event) => {
             if (cardRef.current && !cardRef.current.contains(event.target)) {
@@ -22,81 +31,52 @@ export default function ProductCard({ product }) {
         return () => document.removeEventListener("mousedown", handleClickOutside);
     }, []);
 
-    const handleAddToCart = () => {
-        if (product.soldByWeight) {
-            setShowModal(true); // open modal instead of direct add
-        } else {
-            addToCart(product);
-            setSelected(true);
-            setAdded(true);
-            setTimeout(() => setAdded(false), 1000);
-        }
-    };
+    // Handle + button
+    const handleIncrease = () => {
+        addToCart(product);
+        if (onAddToCart) onAddToCart(product);
 
-    const handleConfirmWeight = (itemWithWeight) => {
-        addToCart(itemWithWeight);
+        setQuantity((q) => q + 1);
         setSelected(true);
         setAdded(true);
         setTimeout(() => setAdded(false), 1000);
     };
 
+    // Handle - button
+    const handleDecrease = () => {
+        if (quantity > 0) {
+            setQuantity((q) => q - 1);
+            // TODO: add removeFromCart(product) later when backend is ready
+        }
+    };
+
     return (
-        <>
-            <div
-                ref={cardRef}
-                className={`p-3 rounded-xl bg-white border border-gray-200 shadow-sm 
-                            flex flex-col items-center cursor-pointer 
-                            transition-transform duration-200 hover:scale-105
-                            ${selected ? "ring-2 ring-brandGreen" : ""}`}
-            >
-                {/* Product Image with Price Badge */}
-                <div className="relative w-full mb-3 bg-gray-50 rounded-lg p-2">
-                    <img
-                        src={product.image}
-                        alt=""
-                        className="w-full h-28 object-cover rounded-lg"
-                    />
-                    <span className="absolute top-2 right-2 bg-brandGreen text-white text-xs font-semibold px-2 py-1 rounded-lg shadow">
-                        {formatProductPrice(product)}
-                    </span>
+        <div
+            ref={cardRef}
+            className={`p-3 rounded-xl bg-white border border-gray-200 shadow-sm flex flex-col items-center cursor-pointer transition-transform duration-200 hover:scale-105 ${selected ? "ring-2 ring-brandGreen" : ""
+                }`}
+        >
+            {/* Product Image + Price */}
+            <div className="relative w-full mb-3 bg-gray-50 rounded-lg p-2">
+                <POSProductImage imageUrl={product.image} name={product.name} />
+                <PriceBadge price={formatProductPrice(product)} />
 
-
-                    {/* Added Animation */}
-                    <AnimatePresence>
-                        {added && (
-                            <motion.span
-                                initial={{ opacity: 0, y: 10, scale: 0.8 }}
-                                animate={{ opacity: 1, y: -20, scale: 1 }}
-                                exit={{ opacity: 0, y: -30, scale: 0.5 }}
-                                className="absolute top-2 left-1/2 -translate-x-1/2 bg-brandGreen text-white text-xs font-bold px-2 py-1 rounded-full shadow"
-                            >
-                                Added!
-                            </motion.span>
-                        )}
-                    </AnimatePresence>
-                </div>
-
-                {/* Product Name */}
-                <h3 className="text-sm font-semibold text-center truncate w-full">{product.name}</h3>
-
-                {/* Add Button */}
-                <button
-                    onClick={handleAddToCart}
-                    className="mt-3 w-full py-2 rounded-full bg-brandGreen text-white text-sm font-medium
-                               hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-brandGreen transition-colors"
-                >
-                    Add
-                </button>
+                <AnimatePresence>
+                    {added && <AddedNotification />}
+                </AnimatePresence>
             </div>
 
-            {/* Weight Modal */}
-            {showModal && (
-                <WeightInputModal
-                    item={product}
-                    onConfirm={handleConfirmWeight}
-                    onClose={() => setShowModal(false)}
-                />
-            )}
-        </>
+            {/* Product Name */}
+            <h3 className="text-sm font-semibold text-center truncate w-full">
+                {product.name}
+            </h3>
+
+            {/* Quantity Controls */}
+            <QuantityControl
+                quantity={quantity}
+                onIncrease={handleIncrease}
+                onDecrease={handleDecrease}
+            />
+        </div>
     );
 }

@@ -8,22 +8,25 @@ import {
   Bars3Icon,
   XMarkIcon,
   PresentationChartBarIcon,
-  DocumentTextIcon
+  DocumentTextIcon,
+  CalendarIcon,
 } from "@heroicons/react/24/outline";
 
 // -------------------- Role-based Menu Definition --------------------
+// Using numeric
 const menuByRole = {
-  superadmin: [
-    { name: "Dashboard", to: "/superadmin/dashboard", icon: HomeIcon }, // Dashboard only
-    { name: "Settings", to: "/superadmin/settings", icon: Cog6ToothIcon }, // App settings
+  0: [ // superadmin
+    { name: "Dashboard", to: "/superadmin/dashboard", icon: HomeIcon },
+    { name: "Settings", to: "/superadmin/settings", icon: Cog6ToothIcon },
   ],
-  admin: [
-    { name: "Dashboard", to: "/admin/dashboard", icon: HomeIcon }, // Main dashboard
-    { name: "Products", to: "/admin/products", icon: CubeIcon }, // Add/edit products
-    { name: "Inventory", to: "/admin/inventory", icon: Squares2X2Icon }, // Adjust stock / inventory
-    { name: "Analytics", to: "/admin/analytics", icon: PresentationChartBarIcon }, // Analytics tab
-    { name: "Reports", to: "/admin/reports", icon: DocumentTextIcon }, // Reports tab
-    { name: "Settings", to: "/admin/settings", icon: Cog6ToothIcon }, // App settings
+  1: [ // admin
+    { name: "Dashboard", to: "/admin/dashboard", icon: HomeIcon },
+    { name: "Products", to: "/admin/products", icon: CubeIcon },
+    { name: "Inventory", to: "/admin/inventory", icon: Squares2X2Icon },
+    { name: "Analytics", to: "/admin/analytics", icon: PresentationChartBarIcon },
+    { name: "Reports", to: "/admin/reports", icon: DocumentTextIcon },
+    { name: "Calendar", to: "/admin/settings", icon: CalendarIcon },
+    { name: "Settings", to: "/admin/settings", icon: Cog6ToothIcon },
   ],
 };
 
@@ -51,7 +54,7 @@ function SidebarLinks({ menuItems, closeSidebar }) {
         <NavLink
           key={name}
           to={to}
-          onClick={closeSidebar} // Close sidebar on mobile after click
+          onClick={closeSidebar}
           className={({ isActive }) =>
             `flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ${isActive
               ? "bg-[#081A4B] text-white shadow-sm font-medium"
@@ -80,8 +83,8 @@ function SidebarFooter() {
 export default function Sidebar() {
   const [isOpen, setIsOpen] = useState(false);
 
-  // 🔹 Get user role from localStorage (default to 'admin')
-  const role = localStorage.getItem("role") || "admin";
+  // 🔹 Get role as a number from localStorage
+  const role = Number(localStorage.getItem("role"));
   const menuItems = menuByRole[role] || [];
 
   const closeSidebar = () => setIsOpen(false);

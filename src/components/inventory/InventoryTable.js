@@ -1,40 +1,56 @@
 import React from "react";
 
-const InventoryTable = ({ inventories, onAdjust }) => {
+// InventoryTable component styled same as ProductTable
+export default function InventoryTable({ inventories = [], onAdjust }) {
     return (
-        <table className="min-w-full divide-y divide-gray-200 text-sm">
-            <thead className="bg-gray-50">
-                <tr>
-                    <th className="px-6 py-3 text-left text-gray-600 font-medium uppercase tracking-wider">Product Name</th>
-                    <th className="px-6 py-3 text-left text-gray-600 font-medium uppercase tracking-wider">Quantity</th>
-                    <th className="px-6 py-3 text-left text-gray-600 font-medium uppercase tracking-wider">Adjust Stock</th>
-                </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-                {inventories.map((inv) => (
-                    <tr key={inv.id} className="hover:bg-gray-50 transition">
-                        <td className="px-6 py-4 text-gray-800 font-medium">{inv.product_name}</td>
-                        <td className="px-6 py-4 text-gray-700">{inv.quantity}</td>
-                        <td className="px-6 py-4 flex gap-3">
-                            <button
-                                className="px-3 py-1 bg-green-600 text-white font-medium rounded-lg hover:bg-green-700 transition"
-                                onClick={() => onAdjust(inv.id, +1)}
-                            >
-                                +
-                            </button>
-                            <button
-                                className="px-3 py-1 bg-red-600 text-white font-medium rounded-lg hover:bg-red-700 transition disabled:opacity-50"
-                                onClick={() => onAdjust(inv.id, -1)}
-                                disabled={inv.quantity === 0}
-                            >
-                                -
-                            </button>
-                        </td>
+        <div className="bg-white rounded-lg shadow border border-gray-200 overflow-x-auto">
+            <table className="w-full text-sm">
+                {/* Header same as ProductTable */}
+                <thead className="bg-[#081A4B] text-white text-xs uppercase">
+                    <tr>
+                        <th className="px-3 py-2 text-left">Product Name</th>
+                        <th className="px-3 py-2 text-left">Quantity</th>
+                        <th className="px-3 py-2 text-center">Adjust Stock</th>
                     </tr>
-                ))}
-            </tbody>
-        </table>
-    );
-};
+                </thead>
 
-export default InventoryTable;
+                {/* Body same structure */}
+                <tbody className="bg-white divide-y divide-gray-200">
+                    {inventories.length === 0 ? (
+                        <tr>
+                            <td colSpan={3} className="text-center text-gray-400 py-6">
+                                No inventory records found.
+                            </td>
+                        </tr>
+                    ) : (
+                        inventories.map((inv) => (
+                            <tr key={inv.id} className="hover:bg-gray-50 transition">
+                                <td className="px-3 py-2 font-medium text-gray-900">
+                                    {inv.product_name}
+                                </td>
+                                <td className="px-3 py-2 text-gray-800">{inv.quantity}</td>
+                                <td className="px-3 py-2 text-center">
+                                    <div className="inline-flex gap-2">
+                                        <button
+                                            className="px-3 py-1 bg-green-600 text-white font-medium rounded hover:bg-green-700 transition"
+                                            onClick={() => onAdjust(inv.id, +1)}
+                                        >
+                                            +
+                                        </button>
+                                        <button
+                                            className="px-3 py-1 bg-red-600 text-white font-medium rounded hover:bg-red-700 transition disabled:opacity-50"
+                                            onClick={() => onAdjust(inv.id, -1)}
+                                            disabled={inv.quantity === 0}
+                                        >
+                                            -
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        ))
+                    )}
+                </tbody>
+            </table>
+        </div>
+    );
+}

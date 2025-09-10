@@ -3,18 +3,19 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-import Login from './pages/LoginPage';
+import Login from './pages/Login';
 import SuperAdminDashboard from './superadmin/Dashboard';
 import AdminDashboard from './admin/Dashboard';
-import ProductsPage from './admin/ProductList';
+// import ProductsPage from './admin/ProductList';
 import InventoryPage from './admin/InventoryPage';
 // import AnalyticsPage from './admin/AnalyticsPage';
 // import ReportsPage from './admin/ReportsPage';
 
-import POSLogin from './pos/pages/LoginPage';
-import POSDashboard from './pos/pages/DashboardPage';
+import POSLogin from './pages/POSLogin';
+import POSDashboard from './pos/pages/Dashboard';
 import ProtectedRoute from './components/settings/ProtectedRoute';
 import { CartProvider } from './pos/components/contexts/cartContext';
+import ProductList from './admin/ProductList';
 
 function App() {
   const [, setIsLoggedIn] = useState(() => localStorage.getItem('isLoggedIn') === 'true');
@@ -52,7 +53,7 @@ function App() {
         <Route
           path="/dashboard"
           element={
-            <ProtectedRoute allowedRoles={['cashier', 'baker']}>
+            <ProtectedRoute allowedRoles={[2, 3]}>
               <CartProvider>
                 <POSDashboard setIsLoggedIn={setIsLoggedIn} />
               </CartProvider>
@@ -60,11 +61,12 @@ function App() {
           }
         />
 
+
         {/* Admin routes */}
         <Route
           path="/admin/dashboard"
           element={
-            <ProtectedRoute allowedRoles={['admin']}>
+            <ProtectedRoute allowedRoles={[1]}>
               <AdminDashboard setIsLoggedIn={setIsLoggedIn} />
             </ProtectedRoute>
           }
@@ -72,15 +74,15 @@ function App() {
         <Route
           path="/admin/products"
           element={
-            <ProtectedRoute allowedRoles={['admin']}>
-              <ProductsPage />
+            <ProtectedRoute allowedRoles={[1]}>
+              <ProductList />
             </ProtectedRoute>
           }
         />
         <Route
           path="/admin/inventory"
           element={
-            <ProtectedRoute allowedRoles={['admin']}>
+            <ProtectedRoute allowedRoles={[1]}>
               <InventoryPage />
             </ProtectedRoute>
           }
@@ -104,7 +106,7 @@ function App() {
         <Route
           path="/admin/settings"
           element={
-            <ProtectedRoute allowedRoles={['admin']}>
+            <ProtectedRoute allowedRoles={[1]}>
               {/* Replace with AdminSettingsPage if exists */}
               <div>Admin Settings Page</div>
             </ProtectedRoute>
@@ -115,7 +117,7 @@ function App() {
         <Route
           path="/superadmin/dashboard"
           element={
-            <ProtectedRoute allowedRoles={['superadmin']}>
+            <ProtectedRoute allowedRoles={[0]}>
               <SuperAdminDashboard setIsLoggedIn={setIsLoggedIn} />
             </ProtectedRoute>
           }
@@ -123,14 +125,14 @@ function App() {
         <Route
           path="/superadmin/settings"
           element={
-            <ProtectedRoute allowedRoles={['superadmin']}>
+            <ProtectedRoute allowedRoles={[0]}>
               {/* Replace with SuperAdminSettingsPage if exists */}
               <div>Superadmin Settings Page</div>
             </ProtectedRoute>
           }
         />
       </Routes>
-    </Router>
+    </Router >
   );
 }
 

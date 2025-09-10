@@ -1,11 +1,12 @@
+// filepath: src/services/axiosInstance.js
 import axios from "axios";
 
-// Create a single axios instance
+// Create a single reusable axios instance
 const axiosInstance = axios.create({
-    baseURL: "http://localhost:4000/api", //backend
+    baseURL: "http://localhost:4000/api", // backend API root
 });
 
-// Automatically add token to headers
+// Interceptor: automatically attach JWT token to every request
 axiosInstance.interceptors.request.use((config) => {
     const token = localStorage.getItem("token");
     if (token) {
