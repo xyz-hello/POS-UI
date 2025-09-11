@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
+import axiosInstance from "../services/axiosInstance"; // your configured axios instance
 
 export const usePOSProducts = () => {
     const [products, setProducts] = useState([]);
@@ -10,8 +10,11 @@ export const usePOSProducts = () => {
         const fetchProducts = async () => {
             try {
                 setLoading(true);
-                const res = await axios.get("http://localhost:4000/api/pos/products");
-                setProducts(res.data);
+
+                // axiosInstance automatically attaches JWT in headers
+                const res = await axiosInstance.get("/pos/products");
+
+                setProducts(res.data); // only products for this customer_id
             } catch (err) {
                 console.error("Error fetching POS products:", err);
                 setError(err);

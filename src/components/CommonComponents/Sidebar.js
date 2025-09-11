@@ -12,8 +12,9 @@ import {
   CalendarIcon,
 } from "@heroicons/react/24/outline";
 
+import Footer from "../CommonComponents/Footer";
+
 // -------------------- Role-based Menu Definition --------------------
-// Using numeric
 const menuByRole = {
   0: [ // superadmin
     { name: "Dashboard", to: "/superadmin/dashboard", icon: HomeIcon },
@@ -34,7 +35,6 @@ const menuByRole = {
 function MobileHeader({ isOpen, setIsOpen }) {
   return (
     <div className="md:hidden flex items-center justify-between px-4 py-3 bg-white text-gray-800 shadow">
-      {/* Toggle button for sidebar */}
       <button
         onClick={() => setIsOpen(!isOpen)}
         className="focus:outline-none"
@@ -70,15 +70,6 @@ function SidebarLinks({ menuItems, closeSidebar }) {
   );
 }
 
-// -------------------- Sidebar Footer --------------------
-function SidebarFooter() {
-  return (
-    <div className="border-t border-gray-200 p-4 text-[#0f1e40] text-xs text-center">
-      &copy; 2025 Zero One
-    </div>
-  );
-}
-
 // -------------------- Main Sidebar Component --------------------
 export default function Sidebar() {
   const [isOpen, setIsOpen] = useState(false);
@@ -91,10 +82,8 @@ export default function Sidebar() {
 
   return (
     <>
-      {/* Mobile header toggle */}
       <MobileHeader isOpen={isOpen} setIsOpen={setIsOpen} />
 
-      {/* Sidebar */}
       <aside
         className={`
           fixed top-0 left-0 h-full bg-white text-gray-700 shadow-md
@@ -104,20 +93,16 @@ export default function Sidebar() {
           md:w-64 z-40 flex flex-col
         `}
       >
-        {/* Desktop logo / header */}
         <div className="hidden md:flex items-center justify-center h-20 border-b border-gray-200">
           {/* Optional logo */}
-          {/* <img src={logo} alt="App Logo" className="h-30" /> */}
         </div>
 
-        {/* Sidebar navigation links */}
         <SidebarLinks menuItems={menuItems} closeSidebar={closeSidebar} />
 
-        {/* Sidebar footer */}
-        <SidebarFooter />
+        {/* Reusable footer */}
+        <Footer company="Zero One" />
       </aside>
 
-      {/* Mobile overlay */}
       {isOpen && (
         <div
           onClick={closeSidebar}

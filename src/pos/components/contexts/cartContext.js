@@ -1,42 +1,76 @@
 import React, { createContext, useContext, useState } from "react";
-import { toast, ToastContainer } from "react-toastify"; // import toast
+import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-// Create Cart Context
 const CartContext = createContext();
 
 export const CartProvider = ({ children }) => {
     const [cart, setCart] = useState([]);
 
-    // Add item to cart
-    const addToCart = (product, qty = 1, weight = null) => {
+    // Add product to cart - stack by productId
+    const addToCart = (product, qty = 1) => {
         setCart(prev => {
-            const existing = prev.find(item => item.id === product.id && item.weight === weight);
-            if (existing) {
-                toast.info(`Updated ${product.name} quantity`);
-                return prev.map(item =>
-                    item.id === product.id && item.weight === weight
-                        ? { ...item, qty: item.qty + qty }
-                        : item
-                );
+            const updatedCart = [...prev];
+
+            // Find existing item with same productId
+            const existingIndex = updatedCart.findIndex(
+                item => item.productId === product.id
+            );
+
+            if (existingIndex !== -1) {
+                // Optional: check stock if available
+                // const newQty = updatedCart[existingIndex].qty + qty;
+                // if (product.stock && newQty > product.stock) {
+                //     toast.error("Not enough stock");
+                //     return updatedCart;
+                // }
+
+                // Product exists, stack quantity
+                updatedCart[existingIndex].qty += qty;
+                toast.success(`${product.name} quantity updated`);
+            } else {
+                // New product, add to cart
+                const newItem = {
+                    lineId: Date.now(),  // unique cart row
+                    productId: product.id, // backend product id
+                    name: product.name,
+                    price: product.price,
+                    qty,
+                };
+                updatedCart.push(newItem);
+                toast.success(`${product.name} added to cart`);
             }
-            toast.success(`${product.name} added to cart`);
-            return [...prev, { ...product, qty, weight }];
+
+            return updatedCart;
         });
     };
 
-    // Remove item from cart
-    const removeFromCart = (id, weight = null) => {
-        setCart(prev => prev.filter(item => !(item.id === id && item.weight === weight)));
-        toast.error("Item removed from cart");
+    // Remove one quantity or full line by lineId
+    const removeFromCart = (lineId, removeAll = false) => {
+        setCart(prev => {
+            const updatedCart = [...prev];
+            const index = updatedCart.findIndex(item => item.lineId === lineId);
+
+            if (index === -1) return updatedCart;
+
+            if (removeAll || updatedCart[index].qty <= 1) {
+                // Remove entire row
+                updatedCart.splice(index, 1);
+                toast.error("Item removed from cart");
+            } else {
+                // Decrease quantity
+                updatedCart[index].qty -= 1;
+                toast.info(`${updatedCart[index].name} quantity decreased`);
+            }
+
+            return updatedCart;
+        });
     };
 
-    // Clear all items in cart
     const clearCart = () => {
         setCart([]);
         toast.warn("Cart cleared");
     };
-
 
     return (
         <CartContext.Provider value={{ cart, addToCart, removeFromCart, clearCart }}>
@@ -46,5 +80,5 @@ export const CartProvider = ({ children }) => {
     );
 };
 
-// Hook to use CartContext
+// Hook to access cart in components
 export const useCart = () => useContext(CartContext);
