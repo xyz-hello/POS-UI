@@ -23,6 +23,16 @@ export default function POSLogin({ setIsLoggedIn }) {
             const response = await api.post("/auth/login", { username, password });
             const { user, token } = response.data;
 
+            // Allowed POS roles → cashier (2) and manager (3)
+            const allowedRoles = [2, 3];
+
+            // Block other roles
+            if (!allowedRoles.includes(Number(user.user_type))) {
+                toast.error("This login page is only for Cashiers and Managers.");
+                localStorage.clear(); // remove session data
+                return;
+            }
+
             // Save JWT token and user info
             localStorage.setItem("token", token);
             localStorage.setItem("isLoggedIn", "true");
@@ -32,10 +42,8 @@ export default function POSLogin({ setIsLoggedIn }) {
 
             setIsLoggedIn(true);
 
-            // Navigate based on role
-            if (Number(user.user_type) === 0) navigate("/superadmin/dashboard");
-            else if (Number(user.user_type) === 1) navigate("/admin/dashboard");
-            else navigate("/dashboard");
+            // POS users always go to POS dashboard
+            navigate("/dashboard");
         } catch (error) {
             toast.error(error.response?.data?.message || error.message);
         }
@@ -46,7 +54,10 @@ export default function POSLogin({ setIsLoggedIn }) {
     };
 
     return (
-        <div className="relative min-h-screen flex flex-col justify-center items-center bg-neutralLight p-6" onKeyDown={handleKeyPress}>
+        <div
+            className="relative min-h-screen flex flex-col justify-center items-center bg-neutralLight p-6"
+            onKeyDown={handleKeyPress}
+        >
             <div className="flex flex-col md:flex-row items-center gap-10 w-full max-w-5xl">
                 <div className="w-64 h-64 md:w-80 md:h-80 flex-shrink-0">
                     <Lottie animationData={posAnimation} loop className="w-full h-full" />
@@ -54,7 +65,9 @@ export default function POSLogin({ setIsLoggedIn }) {
 
                 <div className="bg-neutralCard rounded-2xl shadow-2xl w-full max-w-sm p-8 flex flex-col gap-6">
                     <h2 className="text-2xl font-bold text-neutralDark text-center md:text-left">Welcome!</h2>
-                    <p className="text-sm text-neutralGray text-center md:text-left">Sign in to your account</p>
+                    <p className="text-sm text-neutralGray text-center md:text-left">
+                        Sign in to your account
+                    </p>
 
                     <div className="flex flex-col gap-4">
                         {/* Username */}
@@ -83,11 +96,16 @@ export default function POSLogin({ setIsLoggedIn }) {
                             <span className="absolute left-3 top-1/2 -translate-y-1/2 text-neutralGray">
                                 <FaLock />
                             </span>
-                            <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute top-1/2 right-3 -translate-y-1/2 text-neutralGray hover:text-neutralDark transition">
+                            <button
+                                type="button"
+                                onClick={() => setShowPassword(!showPassword)}
+                                className="absolute top-1/2 right-3 -translate-y-1/2 text-neutralGray hover:text-neutralDark transition"
+                            >
                                 {showPassword ? <FaEyeSlash /> : <FaEye />}
                             </button>
                         </div>
 
+                        {/* Sign In */}
                         <button
                             onClick={handleLogin}
                             className="w-full py-3 rounded-lg font-semibold bg-brandGreen text-white hover:bg-brandGreenDark transition shadow active:scale-95"
