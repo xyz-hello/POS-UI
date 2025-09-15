@@ -1,7 +1,7 @@
 // filepath: src/pos/pages/Dashboard.js
 import React from "react";
-import Sidebar from "../components/layout/Sidebar";
-import Header from "../components/layout/Header";
+import Sidebar from "../components/CommonComponents/Sidebar";
+import Header from "../components/CommonComponents/Header";
 import ProductList from "../pages/productList";
 import CartSidebar from "../components/cart/CartSidebar";
 

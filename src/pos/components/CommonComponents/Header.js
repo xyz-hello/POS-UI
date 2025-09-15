@@ -1,6 +1,6 @@
 // src/pos/layout/Header.js
 import React, { useState, useCallback, useRef, useEffect } from "react";
-import { MagnifyingGlassCircleIcon, UserIcon, ArrowRightOnRectangleIcon } from "@heroicons/react/24/outline";
+import { UserIcon, ArrowRightOnRectangleIcon } from "@heroicons/react/24/outline";
 import ConfirmationModal from "../../../components/CommonComponents/ConfirmationModal";
 import { useNavigate } from "react-router-dom";
 
@@ -40,19 +40,6 @@ export default function Header() {
                 </h1>
             </div>
 
-            {/* Search
-            <div className="flex-1 flex justify-center mt-3 sm:mt-0">
-                <div className="w-full max-w-xl relative px-4 sm:px-0">
-                    <MagnifyingGlassCircleIcon
-                        className="w-5 h-5 text-neutralGray absolute left-3 top-1/2 -translate-y-1/2"
-                    />
-                    <input
-                        type="text"
-                        placeholder="Search menu, orders and more"
-                        className="w-full pl-10 pr-4 py-2 rounded-lg border border-neutralBorder focus:outline-none focus:ring-2 focus:ring-brandGreen"
-                    />
-                </div>
-            </div> */}
 
             {/* User dropdown */}
             <div className="relative" ref={dropdownRef}>

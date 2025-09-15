@@ -40,7 +40,11 @@ function MobileHeader({ isOpen, setIsOpen }) {
         className="focus:outline-none"
         aria-label="Toggle sidebar"
       >
-        {isOpen ? <XMarkIcon className="h-7 w-7" /> : <Bars3Icon className="h-7 w-7" />}
+        {isOpen ? (
+          <XMarkIcon className="h-7 w-7" />
+        ) : (
+          <Bars3Icon className="h-7 w-7" />
+        )}
       </button>
     </div>
   );
@@ -93,16 +97,19 @@ export default function Sidebar() {
           md:w-64 z-40 flex flex-col
         `}
       >
+        {/* Optional logo/header */}
         <div className="hidden md:flex items-center justify-center h-20 border-b border-gray-200">
-          {/* Optional logo */}
+          {/* Logo can go here */}
         </div>
 
+        {/* Navigation Links */}
         <SidebarLinks menuItems={menuItems} closeSidebar={closeSidebar} />
 
-        {/* Reusable footer */}
-        <Footer company="Zero One" />
+        {/* Footer pinned at the bottom */}
+        <Footer company="Zero One" className="mt-auto" />
       </aside>
 
+      {/* Overlay for mobile sidebar */}
       {isOpen && (
         <div
           onClick={closeSidebar}

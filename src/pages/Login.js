@@ -6,6 +6,7 @@ import { toast } from "react-toastify";
 import Lottie from "lottie-react";
 import loginAnimation from "../assets/animations/Login.json";
 import axiosInstance from "../services/axiosInstance";
+import Footer from "../components/CommonComponents/Footer";
 
 export default function LoginPage({ setIsLoggedIn }) {
   const [username, setUsername] = useState("");
@@ -74,16 +75,19 @@ export default function LoginPage({ setIsLoggedIn }) {
   return (
     <div className="flex min-h-screen">
       {/* Left animation panel */}
-      <div className="hidden md:flex w-1/2 bg-[#081A4B] justify-center items-center px-6">
+      <div className="hidden md:flex w-1/2 bg-gray-50 justify-center items-center px-6">
         <Lottie animationData={loginAnimation} loop className="w-full h-full max-w-lg max-h-[500px]" />
       </div>
 
       {/* Right login form */}
       <div className="flex flex-col w-full md:w-1/2 bg-gray-50 justify-center items-center p-8">
         <div className="bg-white p-8 rounded-xl shadow-lg w-full max-w-md flex flex-col items-center">
-          {/* <img src={logo} alt="Logo" className="w-48 h-auto max-h-40 mb-6 object-scale-down" /> */}
-          <h1 className="text-3xl font-semibold text-[#081A4B] mb-6">{loginRoleText}</h1>
-
+          {/* Centered login role text inside form container */}
+          <div className="w-full flex justify-center mb-6">
+            <h1 className="text-3xl font-semibold text-[#081A4B]">{loginRoleText}</h1>
+          </div>
+          {/* Add upper center padding */}
+          <div className="pt-8" />
           <form onSubmit={handleLogin} className="space-y-4 w-full">
             <div className="relative">
               <FaUser className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
@@ -132,6 +136,13 @@ export default function LoginPage({ setIsLoggedIn }) {
           </div>
         </div>
       </div>
+      <Footer
+        className="absolute bottom-4 left-4 text-xs text-neutralGray"
+        company="Zero One"
+        noBorder
+        noPadding
+      />
+
     </div>
   );
 }

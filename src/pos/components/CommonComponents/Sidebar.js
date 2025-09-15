@@ -1,21 +1,20 @@
-// src/pos/layout/Sidebar.js
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Footer from "../../../components/CommonComponents/Footer";
-import { primaryMenu, secondaryMenu } from "../layout/SidebarMenu";
+import { primaryMenu, secondaryMenu } from "./SidebarMenu";
 
 export default function Sidebar({ collapsed, setCollapsed, isMobile }) {
-    const [active, setActive] = useState("Sales"); // Default active tab
+    const [active, setActive] = useState("Sales"); // Default active menu
     const navigate = useNavigate();
 
-    // Render menu item button
+    // -------------------- Render each menu item --------------------
     const renderMenuItem = (item) => {
         const Icon = item.icon;
         const isActive = active === item.name;
 
         const handleClick = () => {
-            setActive(item.name); // set active tab
-            navigate(`/pos/${item.name.toLowerCase()}`); // navigate
+            setActive(item.name); // Highlight clicked menu
+            navigate(`/pos/${item.name.toLowerCase()}`); // Navigate to corresponding route
         };
 
         return (
@@ -23,7 +22,7 @@ export default function Sidebar({ collapsed, setCollapsed, isMobile }) {
                 key={item.name}
                 onClick={handleClick}
                 className={`w-full flex items-center px-4 sm:px-6 py-2 sm:py-3 rounded-lg transition-colors
-                    ${isActive
+          ${isActive
                         ? "bg-brandGreen text-white"
                         : "hover:bg-neutralHover text-neutralDark"
                     }`}
@@ -42,11 +41,11 @@ export default function Sidebar({ collapsed, setCollapsed, isMobile }) {
     return (
         <div
             className={`h-screen flex flex-col justify-between transition-all duration-300 overflow-auto
-                ${collapsed ? "w-16" : "w-64"} bg-neutralCard shadow-sm
-                ${isMobile ? "fixed top-0 left-0 z-50" : "relative"}`}
+        ${collapsed ? "w-16" : "w-64"} bg-neutralCard shadow-sm
+        ${isMobile ? "fixed top-0 left-0 z-50" : "relative"}`}
             style={{ paddingTop: "6rem" }} // offset for fixed header
         >
-            {/* Mobile toggle button */}
+            {/* -------------------- Mobile toggle button -------------------- */}
             {isMobile && (
                 <div className="p-2 flex justify-end">
                     <button
@@ -58,24 +57,22 @@ export default function Sidebar({ collapsed, setCollapsed, isMobile }) {
                 </div>
             )}
 
-            {/* Primary cashier menu */}
+            {/* -------------------- Primary Menu -------------------- */}
             <nav className="flex-1 flex flex-col gap-3 px-2 sm:px-4 pt-4 sm:pt-0">
                 {primaryMenu.map(renderMenuItem)}
             </nav>
 
-            {/* Divider */}
-            {!collapsed && (
-                <div className="border-t border-neutralBorder mx-4 my-2"></div>
-            )}
+            {/* -------------------- Divider -------------------- */}
+            {!collapsed && <div className="border-t border-neutralBorder mx-4 my-2"></div>}
 
-            {/* Secondary utilities (without logout now) */}
+            {/* -------------------- Secondary Menu (without Logout) -------------------- */}
             <div className="px-2 sm:px-4 flex flex-col gap-2">
                 {secondaryMenu
-                    .filter((item) => item.name !== "Logout") // remove Logout
+                    .filter(item => item.name !== "Logout")
                     .map(renderMenuItem)}
             </div>
 
-            {/* Footer (reused) */}
+            {/* -------------------- Reusable Footer -------------------- */}
             {!collapsed && <Footer />}
         </div>
     );

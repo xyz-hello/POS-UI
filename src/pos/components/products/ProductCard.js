@@ -8,19 +8,12 @@ import AddedNotification from "./AddedNotification";
 import QuantityControl from "./QuantityControl";
 
 export default function ProductCard({ product, onAddToCart }) {
-    // Track quantity for this product
     const [quantity, setQuantity] = useState(0);
-
-    // Track card focus state (visual ring effect)
     const [selected, setSelected] = useState(false);
-
-    // Track whether "Added!" feedback should show
     const [added, setAdded] = useState(false);
-
     const cardRef = useRef(null);
     const { addToCart } = useCart();
 
-    // Close selection if clicked outside card
     useEffect(() => {
         const handleClickOutside = (event) => {
             if (cardRef.current && !cardRef.current.contains(event.target)) {
@@ -31,7 +24,6 @@ export default function ProductCard({ product, onAddToCart }) {
         return () => document.removeEventListener("mousedown", handleClickOutside);
     }, []);
 
-    // Handle + button
     const handleIncrease = () => {
         addToCart(product);
         if (onAddToCart) onAddToCart(product);
@@ -42,19 +34,15 @@ export default function ProductCard({ product, onAddToCart }) {
         setTimeout(() => setAdded(false), 1000);
     };
 
-    // Handle - button
     const handleDecrease = () => {
-        if (quantity > 0) {
-            setQuantity((q) => q - 1);
-            // TODO: add removeFromCart(product) later when backend is ready
-        }
+        if (quantity > 0) setQuantity((q) => q - 1);
+        // TODO: implement removeFromCart(product) when backend is ready
     };
 
     return (
         <div
             ref={cardRef}
-            className={`p-3 rounded-xl bg-white border border-gray-200 shadow-sm flex flex-col items-center cursor-pointer transition-transform duration-200 hover:scale-105 ${selected ? "ring-2 ring-brandGreen" : ""
-                }`}
+            className={`p-3 rounded-xl bg-white border border-gray-200 shadow-sm flex flex-col items-center cursor-pointer transition-transform duration-200 hover:scale-105 ${selected ? "ring-2 ring-brandGreen" : ""}`}
         >
             {/* Product Image + Price */}
             <div className="relative w-full mb-3 bg-gray-50 rounded-lg p-2">
@@ -70,6 +58,13 @@ export default function ProductCard({ product, onAddToCart }) {
             <h3 className="text-sm font-semibold text-center truncate w-full">
                 {product.name}
             </h3>
+
+            {/* Product Description */}
+            {product.description && (
+                <p className="text-xs text-gray-500 text-center mt-1 line-clamp-2 w-full">
+                    {product.description}
+                </p>
+            )}
 
             {/* Quantity Controls */}
             <QuantityControl
