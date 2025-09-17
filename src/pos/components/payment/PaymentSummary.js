@@ -1,9 +1,14 @@
 import React from "react";
 import { formatPrice } from "../../utils/FormatPrice";
 
-//PAYMENT SUMMARY COMPONENT
+/**
+ * Displays subtotal, discount, and total.
+ * Accepts optional tax or additional fees in future.
+ */
+export default function PaymentSummary({ subtotal = 0, discount = 0, total }) {
+    // Compute total if not provided
+    const finalTotal = total ?? subtotal - discount;
 
-export default function PaymentSummary({ subtotal, discount }) {
     return (
         <div className="flex flex-col gap-2">
             {/* Subtotal */}
@@ -13,10 +18,12 @@ export default function PaymentSummary({ subtotal, discount }) {
             </div>
 
             {/* Discount */}
-            <div className="flex justify-between text-sm text-gray-700">
-                <span>Discount</span>
-                <span>-{formatPrice(discount)}</span>
-            </div>
+            {discount > 0 && (
+                <div className="flex justify-between text-sm text-gray-700">
+                    <span>Discount</span>
+                    <span>-{formatPrice(discount)}</span>
+                </div>
+            )}
 
             {/* Dashed line separator */}
             <div className="px-2 my-1">
@@ -26,7 +33,7 @@ export default function PaymentSummary({ subtotal, discount }) {
             {/* Total */}
             <div className="flex justify-between text-sm font-semibold text-gray-900">
                 <span>Total</span>
-                <span>{formatPrice(subtotal - discount)}</span>
+                <span>{formatPrice(finalTotal)}</span>
             </div>
         </div>
     );

@@ -1,3 +1,4 @@
+// filepath: src/components/POS/CartSidebar.js
 import React, { useState, useMemo } from "react";
 import { useCart } from "../contexts/cartContext";
 import { Pencil, Trash2, ShoppingCart } from "lucide-react";
@@ -8,9 +9,10 @@ import PaymentSummary from "../payment/PaymentSummary";
 import { formatPrice } from "../../utils/FormatPrice";
 
 export default function CartSidebar() {
-    const { cart, removeFromCart } = useCart();
+    const { cart, removeFromCart, clearCart } = useCart();
     const [editItem, setEditItem] = useState(null);
     const [deleteItem, setDeleteItem] = useState(null);
+    const [orderNumber, setOrderNumber] = useState(null); // dynamic order number
 
     // Calculate subtotal and total
     const subtotal = useMemo(
@@ -20,17 +22,23 @@ export default function CartSidebar() {
     const discount = 0;
     const total = subtotal - discount;
 
-    // Handle payment
-    const handlePayTransaction = ({ method, amount }) => {
-        console.log("Payment Info:", { method, amount });
-        alert(`Paid ${formatPrice(amount)} via ${method}`);
+    /** Called when payment completes successfully */
+    const handleOrderComplete = (order_number, paidAmount) => {
+        setOrderNumber(order_number); // update order number
+        clearCart(); // clear cart after successful payment
     };
 
     return (
         <aside className="w-72 bg-neutralCard rounded-xl shadow-md flex flex-col h-full mt-4 overflow-hidden">
             {/* Header */}
             <div className="px-4 py-2 border-b border-neutralBorder flex-shrink-0">
-                <h2 className="text-lg font-semibold text-neutralDark">Order #12345</h2>
+                <h2 className="text-lg font-semibold text-neutralDark">
+                    {cart.length === 0
+                        ? "No pending order"
+                        : orderNumber
+                            ? `Order #${orderNumber}`
+                            : "Pending Order"}
+                </h2>
                 <p className="text-xs text-neutralGray mt-0.5 uppercase tracking-wide">
                     Ordered Items
                 </p>
@@ -46,7 +54,7 @@ export default function CartSidebar() {
                 ) : (
                     cart.map((item) => (
                         <div
-                            key={item.id}
+                            key={item.lineId || item.id}
                             className="flex justify-between items-center py-1.5 border-b border-neutralBorder last:border-none"
                         >
                             {/* Product info */}
@@ -81,25 +89,26 @@ export default function CartSidebar() {
 
             {/* Footer - sticky at bottom */}
             <div className="flex-shrink-0 border-t border-neutralBorder bg-neutralCard px-4 py-3 rounded-b-xl">
-                <PaymentSummary subtotal={subtotal} discount={discount} />
+                <PaymentSummary subtotal={subtotal} discount={discount} total={total} />
                 <div className="mt-2">
-                    <PaymentPanel total={total} onPay={handlePayTransaction} />
+                    <PaymentPanel
+                        total={total}
+                        cart={cart}
+                        onOrderComplete={handleOrderComplete}
+                    />
                 </div>
             </div>
 
             {/* Modals */}
             {editItem && (
-                <EditCartItemModal
-                    item={editItem}
-                    onClose={() => setEditItem(null)}
-                />
+                <EditCartItemModal item={editItem} onClose={() => setEditItem(null)} />
             )}
             {deleteItem && (
                 <ConfirmationModal
                     isOpen={!!deleteItem}
                     onClose={() => setDeleteItem(null)}
                     onConfirm={() => {
-                        removeFromCart(deleteItem.id);
+                        removeFromCart(deleteItem.lineId || deleteItem.id);
                         setDeleteItem(null);
                     }}
                     title="Remove Item"

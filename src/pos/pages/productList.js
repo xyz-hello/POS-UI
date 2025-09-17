@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import InfiniteScroll from "react-infinite-scroll-component";
 import { usePOSProducts } from "../../hooks/usePOSProducts";
 import ProductCard from "../components/products/ProductCard";
@@ -12,10 +12,12 @@ export default function POSProductList() {
     const itemsPerLoad = 20;
     const [loadedCount, setLoadedCount] = useState(0);
 
-    // Filter products based on search term
-    const filteredProducts = products.filter((product) =>
-        product.name.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    // Memoize filtered products so it doesn't change every render
+    const filteredProducts = useMemo(() => {
+        return products.filter((product) =>
+            product.name.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+    }, [products, searchTerm]);
 
     // Reset displayed products when search changes
     useEffect(() => {
@@ -23,7 +25,7 @@ export default function POSProductList() {
         setDisplayProducts(initialLoad);
         setLoadedCount(initialLoad.length);
         setHasMore(initialLoad.length < filteredProducts.length);
-    }, [searchTerm, filteredProducts]);
+    }, [filteredProducts]); // only re-run when filteredProducts actually changes
 
     // Load more products for infinite scroll
     const loadMoreProducts = () => {
@@ -50,16 +52,11 @@ export default function POSProductList() {
                         key={idx}
                         className="bg-white rounded-lg shadow-sm p-3 flex flex-col animate-pulse"
                     >
-                        {/* Image placeholder */}
                         <div className="bg-gray-200 h-32 sm:h-36 md:h-40 lg:h-44 rounded-md relative overflow-hidden">
                             <div className="absolute inset-0 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 opacity-50 animate-[shimmer_1.5s_infinite]" />
                         </div>
-
-                        {/* Title placeholder */}
                         <div className="h-4 bg-gray-200 rounded w-3/4 mt-3 mb-1"></div>
-                        {/* Price placeholder */}
                         <div className="h-4 bg-gray-200 rounded w-1/2 mb-3"></div>
-                        {/* Button placeholder */}
                         <div className="h-8 bg-gray-200 rounded"></div>
                     </div>
                 ))}

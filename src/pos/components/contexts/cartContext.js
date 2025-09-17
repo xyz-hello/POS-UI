@@ -1,3 +1,4 @@
+
 // filepath: src/contexts/cartContext.js
 import React, { createContext, useContext, useState } from "react";
 import { toast, ToastContainer } from "react-toastify";
@@ -25,7 +26,6 @@ export const CartProvider = ({ children }) => {
                 const existingItem = updatedCart[existingIndex];
                 const newQty = existingItem.qty + qty;
 
-                // Enforce stock limit if stock is defined
                 if (product.stock && newQty > product.stock) {
                     toast.error(`Only ${product.stock} left in stock`);
                     return updatedCart;
@@ -34,15 +34,14 @@ export const CartProvider = ({ children }) => {
                 updatedCart[existingIndex].qty = newQty;
                 toast.success(`${product.name} quantity updated`);
             } else {
-                // If product has stock, respect it
                 if (product.stock && qty > product.stock) {
                     toast.error(`Only ${product.stock} left in stock`);
                     return updatedCart;
                 }
 
                 const newItem = {
-                    lineId: Date.now(),      // unique row ID for cart line
-                    productId: product.id,   // backend product id
+                    lineId: Date.now(), // unique cart row id
+                    productId: product.id,
                     name: product.name,
                     price: product.price,
                     qty,
@@ -90,9 +89,21 @@ export const CartProvider = ({ children }) => {
         return item ? item.qty : 0;
     };
 
+    /** Get total amount in cart */
+    const getCartTotal = () => {
+        return cart.reduce((sum, item) => sum + item.price * item.qty, 0);
+    };
+
     return (
         <CartContext.Provider
-            value={{ cart, addToCart, removeFromCart, clearCart, getItemQuantity }}
+            value={{
+                cart,
+                addToCart,
+                removeFromCart,
+                clearCart,
+                getItemQuantity,
+                getCartTotal,
+            }}
         >
             {children}
             <ToastContainer position="bottom-right" autoClose={2000} />

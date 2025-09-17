@@ -14,11 +14,11 @@ export default function POSProductImage({ imageUrl, name }) {
             : `${uploadsBaseURL}${imageUrl.replace(/^\/+/, "")}`
         : null;
 
-    // Debug logs
-    console.log("POSProductImage Debug:");
-    console.log("  imageUrl prop:", imageUrl);
-    console.log("  uploadsBaseURL:", uploadsBaseURL);
-    console.log("  final srcUrl:", srcUrl);
+    // // Debug logs
+    // console.log("POSProductImage Debug:");
+    // console.log("  imageUrl prop:", imageUrl);
+    // console.log("  uploadsBaseURL:", uploadsBaseURL);
+    // console.log("  final srcUrl:", srcUrl);
 
     return srcUrl ? (
         <img
