@@ -26,7 +26,7 @@ const menuByRole = {
     { name: "Inventory", to: "/admin/inventory", icon: Squares2X2Icon },
     { name: "Analytics", to: "/admin/analytics", icon: PresentationChartBarIcon },
     { name: "Reports", to: "/admin/reports", icon: DocumentTextIcon },
-    { name: "Calendar", to: "/admin/settings", icon: CalendarIcon },
+    { name: "Calendar", to: "/admin/calendar", icon: CalendarIcon },
     { name: "Settings", to: "/admin/settings", icon: Cog6ToothIcon },
   ],
 };
