@@ -1,5 +1,4 @@
-// filepath: src/pos/pages/POSLogin.js
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import api from "../services/axiosInstance";
@@ -11,6 +10,7 @@ export default function POSLogin({ setIsLoggedIn }) {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     const [showPassword, setShowPassword] = useState(false);
+    const [animate, setAnimate] = useState(false); // trigger entrance animation
     const navigate = useNavigate();
 
     const handleLogin = async () => {
@@ -23,17 +23,13 @@ export default function POSLogin({ setIsLoggedIn }) {
             const response = await api.post("/auth/login", { username, password });
             const { user, token } = response.data;
 
-            // Allowed POS roles → cashier (2) and manager (3)
-            const allowedRoles = [2, 3];
-
-            // Block other roles
+            const allowedRoles = [2, 3]; // cashier & manager
             if (!allowedRoles.includes(Number(user.user_type))) {
                 toast.error("This login page is only for Cashiers and Managers.");
-                localStorage.clear(); // remove session data
+                localStorage.clear();
                 return;
             }
 
-            // Save JWT token and user info
             localStorage.setItem("token", token);
             localStorage.setItem("isLoggedIn", "true");
             localStorage.setItem("role", String(user.user_type));
@@ -41,8 +37,6 @@ export default function POSLogin({ setIsLoggedIn }) {
             if (user.customer_id) localStorage.setItem("customer_id", user.customer_id);
 
             setIsLoggedIn(true);
-
-            // POS users always go to POS dashboard
             navigate("/dashboard");
         } catch (error) {
             toast.error(error.response?.data?.message || error.message);
@@ -53,18 +47,40 @@ export default function POSLogin({ setIsLoggedIn }) {
         if (e.key === "Enter") handleLogin();
     };
 
+    // trigger entrance animation after component mounts
+    useEffect(() => {
+        const timer = setTimeout(() => setAnimate(true), 100);
+        return () => clearTimeout(timer);
+    }, []);
+
     return (
         <div
             className="relative min-h-screen flex flex-col justify-center items-center bg-neutralLight p-6"
             onKeyDown={handleKeyPress}
         >
             <div className="flex flex-col md:flex-row items-center gap-10 w-full max-w-5xl">
-                <div className="w-64 h-64 md:w-80 md:h-80 flex-shrink-0">
-                    <Lottie animationData={posAnimation} loop className="w-full h-full" />
+                {/* Lottie animation with entrance animation */}
+                <div
+                    className={`w-64 h-64 md:w-80 md:h-80 flex-shrink-0
+                        transition-opacity transition-transform duration-1000 ease-out
+                        ${animate ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-10"}`}
+                >
+                    <Lottie
+                        animationData={posAnimation}
+                        loop
+                        className="w-full h-full"
+                    />
                 </div>
 
-                <div className="bg-neutralCard rounded-2xl shadow-2xl w-full max-w-sm p-8 flex flex-col gap-6">
-                    <h2 className="text-2xl font-bold text-neutralDark text-center md:text-left">Welcome!</h2>
+                {/* Login form with entrance animation */}
+                <div
+                    className={`bg-neutralCard rounded-2xl shadow-2xl w-full max-w-sm p-8 flex flex-col gap-6
+                        transition-opacity transition-transform duration-1000 ease-out
+                        ${animate ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"}`}
+                >
+                    <h2 className="text-2xl font-bold text-neutralDark text-center md:text-left">
+                        Welcome!
+                    </h2>
                     <p className="text-sm text-neutralGray text-center md:text-left">
                         Sign in to your account
                     </p>

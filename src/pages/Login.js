@@ -1,8 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { FaUser, FaLock, FaEye, FaEyeSlash } from "react-icons/fa";
 import { toast } from "react-toastify";
-// import logo from "../assets/logo.png";
 import Lottie from "lottie-react";
 import loginAnimation from "../assets/animations/Login.json";
 import axiosInstance from "../services/axiosInstance";
@@ -12,6 +11,7 @@ export default function LoginPage({ setIsLoggedIn }) {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [animate, setAnimate] = useState(false); // control page entrance animation
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -36,8 +36,6 @@ export default function LoginPage({ setIsLoggedIn }) {
       const response = await axiosInstance.post("/auth/login", { username, password });
       const { token, user } = response.data;
 
-      console.log("API response user:", user);
-
       // Check if user can access this login page
       if (
         (role === "superadmin" && user.user_type !== roleMap.superadmin) ||
@@ -48,46 +46,62 @@ export default function LoginPage({ setIsLoggedIn }) {
         return;
       }
 
-      // Persist authentication info with numeric role
+      // Persist authentication info
       localStorage.setItem("token", token);
       localStorage.setItem("user", JSON.stringify(user));
       localStorage.setItem("isLoggedIn", "true");
-      localStorage.setItem("role", String(user.user_type)); // numeric as string
+      localStorage.setItem("role", String(user.user_type));
       if (user.customer_id) localStorage.setItem("customer_id", user.customer_id);
-
-      // Debug logs
-      console.log("localStorage after login:");
-      console.log("role:", localStorage.getItem("role")); // should be numeric string
-      console.log("isLoggedIn:", localStorage.getItem("isLoggedIn"));
 
       setIsLoggedIn(true);
 
       // Redirect by role
       if (user.user_type === roleMap.superadmin) navigate("/superadmin/dashboard");
       else if (user.user_type === roleMap.admin) navigate("/admin/dashboard");
-      else navigate("/dashboard"); // POS dashboard for manager/cashier
+      else navigate("/dashboard");
     } catch (err) {
       console.error("Login error:", err);
       toast.error(err.response?.data?.message || "Invalid credentials");
     }
   };
 
+  // Trigger entrance animation after component mounts
+  useEffect(() => {
+    const timer = setTimeout(() => setAnimate(true), 100);
+    return () => clearTimeout(timer);
+  }, []);
+
   return (
     <div className="flex min-h-screen">
       {/* Left animation panel */}
-      <div className="hidden md:flex w-1/2 bg-gray-50 justify-center items-center px-6">
-        <Lottie animationData={loginAnimation} loop className="w-full h-full max-w-lg max-h-[500px]" />
+      <div
+        className={`hidden md:flex w-1/2 bg-primaryNavy justify-center items-center px-6 
+          transition-all duration-1000 ease-out transform ${animate ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-10"
+          }`}
+      >
+        <Lottie
+          animationData={loginAnimation}
+          loop
+          className="w-5/6 max-w-xl h-auto"
+          style={{
+            maxHeight: "80vh",
+            minHeight: "400px",
+          }}
+        />
       </div>
 
       {/* Right login form */}
-      <div className="flex flex-col w-full md:w-1/2 bg-gray-50 justify-center items-center p-8">
+      <div
+        className={`flex flex-col w-full md:w-1/2 bg-gray-50 justify-center items-center p-8
+          transition-all duration-1000 ease-out transform ${animate ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
+          }`}
+      >
         <div className="bg-white p-8 rounded-xl shadow-lg w-full max-w-md flex flex-col items-center">
-          {/* Centered login role text inside form container */}
+          {/* Centered login role text */}
           <div className="w-full flex justify-center mb-6">
             <h1 className="text-3xl font-semibold text-[#081A4B]">{loginRoleText}</h1>
           </div>
-          {/* Add upper center padding */}
-          <div className="pt-8" />
+
           <form onSubmit={handleLogin} className="space-y-4 w-full">
             <div className="relative">
               <FaUser className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
@@ -136,13 +150,13 @@ export default function LoginPage({ setIsLoggedIn }) {
           </div>
         </div>
       </div>
+
       <Footer
         className="absolute bottom-4 left-4 text-xs text-neutralGray"
         company="Zero One"
         noBorder
         noPadding
       />
-
     </div>
   );
 }
