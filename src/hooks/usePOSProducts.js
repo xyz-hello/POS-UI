@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+// src/hooks/usePOSProducts.js
+import { useState, useEffect, useCallback } from "react";
 import { getPOSProducts } from "../services/posProductServices";
 
 export const usePOSProducts = () => {
@@ -6,22 +7,31 @@ export const usePOSProducts = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
-    useEffect(() => {
-        const fetchProducts = async () => {
-            try {
-                setLoading(true);
-                const data = await getPOSProducts();
-                setProducts(data);
-            } catch (err) {
-                console.error("Error fetching POS products:", err);
-                setError(err);
-            } finally {
-                setLoading(false);
-            }
-        };
+    const fetchProducts = useCallback(async () => {
+        try {
+            setLoading(true);
+            setError(null);
 
-        fetchProducts();
+            const data = await getPOSProducts();
+            setProducts(data);
+        } catch (err) {
+            console.error("Error fetching POS products:", err);
+
+            if (err.response) {
+                setError(`Server error: ${err.response.status} ${err.response.statusText}`);
+            } else if (err.request) {
+                setError("Network error: Please check your connection.");
+            } else {
+                setError("Unexpected error occurred. Please try again.");
+            }
+        } finally {
+            setLoading(false);
+        }
     }, []);
 
-    return { products, loading, error };
+    useEffect(() => {
+        fetchProducts();
+    }, [fetchProducts]);
+
+    return { products, loading, error, fetchProducts };
 };
