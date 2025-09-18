@@ -85,7 +85,7 @@ export default function PaymentPanel({ total, cart, onPay }) {
                             : "bg-brandGreen hover:bg-brandGreenDark"
                         }`}
                 >
-                    {`Pay ${formatPrice(paymentMethod === "cash" ? numericPaid || total : total)}`}
+                    {`Place Order`}
                 </button>
             </div>
         </div>
