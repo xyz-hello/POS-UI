@@ -13,6 +13,7 @@ import ProtectedRoute from './components/settings/ProtectedRoute';
 import { CartProvider } from './pos/components/contexts/cartContext';
 import ProductList from './admin/ProductList';
 import AdminCalendarPage from './admin/CalendarPage';
+import UnderConstructionIcon from './components/CommonComponents/UnderConstructionIcon';
 
 function App() {
   const [, setIsLoggedIn] = useState(() => localStorage.getItem('isLoggedIn') === 'true');
@@ -69,11 +70,30 @@ function App() {
             <InventoryPage />
           </ProtectedRoute>
         } />
-        <Route path="/admin/settings" element={
-          <ProtectedRoute allowedRoles={[1]}>
-            <div>Admin Settings Page</div>
-          </ProtectedRoute>
-        } />
+        <Route path="/admin/analytics"
+          element={
+            <ProtectedRoute allowedRoles={[1]}>
+              <div className="flex justify-center items-center h-full">
+                <UnderConstructionIcon size={150} />
+              </div>
+            </ProtectedRoute>
+          } />
+        <Route path="/admin/reports"
+          element={
+            <ProtectedRoute allowedRoles={[1]}>
+              <div className="flex justify-center items-center h-full">
+                <UnderConstructionIcon size={150} />
+              </div>
+            </ProtectedRoute>
+          } />
+        <Route path="/admin/settings"
+          element={
+            <ProtectedRoute allowedRoles={[1]}>
+              <div className="flex justify-center items-center h-full">
+                <UnderConstructionIcon size={150} />
+              </div>
+            </ProtectedRoute>
+          } />
         <Route path="/admin/calendar" element={
           <ProtectedRoute allowedRoles={[1]}>
             <AdminCalendarPage />
@@ -88,7 +108,9 @@ function App() {
         } />
         <Route path="/superadmin/settings" element={
           <ProtectedRoute allowedRoles={[0]}>
-            <div>Superadmin Settings Page</div>
+            <div className="flex justify-center items-center h-full">
+              <UnderConstructionIcon size={150} />
+            </div>
           </ProtectedRoute>
         } />
       </Routes>
