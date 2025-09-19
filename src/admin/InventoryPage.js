@@ -1,4 +1,4 @@
-// src/pages/InventoryPage.js
+// filepath: src/pages/InventoryPage.js
 import React, { useState, useEffect, useCallback } from "react";
 import Header from "../components/CommonComponents/Header";
 import Sidebar from "../components/CommonComponents/Sidebar";
@@ -75,7 +75,6 @@ const InventoryPage = () => {
             <div className="flex-1 flex flex-col">
                 <Header />
                 <main className="flex-1 px-6 py-8 bg-gray-50">
-                    {/* Container for uniform vertical spacing */}
                     <div className="flex flex-col gap-6">
                         {/* Search Input */}
                         <SearchBar
@@ -102,19 +101,13 @@ const InventoryPage = () => {
                         </div>
 
                         {/* Inventory Display */}
-                        {viewMode === "table" ? (
-                            <div className="bg-white rounded-2xl shadow-lg overflow-x-auto border border-gray-200">
-                                {currentInventory.length === 0 ? (
-                                    <p className="text-center text-gray-400 py-10">
-                                        No inventory found.
-                                    </p>
-                                ) : (
-                                    <InventoryTable
-                                        inventories={currentInventory}
-                                        onAdjust={handleAdjust}
-                                    />
-                                )}
-                            </div>
+                        {loading ? (
+                            <div>Loading...</div>
+                        ) : viewMode === "table" ? (
+                            <InventoryTable
+                                inventories={currentInventory}
+                                onAdjust={handleAdjust}
+                            />
                         ) : (
                             <InventoryGrid
                                 inventories={currentInventory}

@@ -4,8 +4,8 @@ import InfiniteScroll from "react-infinite-scroll-component";
 import { usePOSProducts } from "../../hooks/usePOSProducts";
 import ProductCard from "../components/products/ProductCard";
 import SearchBar from "../components/CommonComponents/SeachBar";
-import EmptyState from "../components/CommonComponents/EmptyState";
-import ErrorState from "../components/CommonComponents/ErrorState";
+import EmptyState from "../../components/CommonComponents/EmptyState";
+import ErrorState from "../../components/CommonComponents/ErrorState";
 import { ShoppingCart, WifiOff } from "lucide-react";
 
 // Reusable skeleton loader for product cards

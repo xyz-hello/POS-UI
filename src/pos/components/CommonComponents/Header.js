@@ -35,9 +35,10 @@ export default function Header() {
         <header className="w-full flex justify-between items-center p-4 sm:p-5 bg-neutralCard border-b border-neutralBorder fixed top-0 left-0 z-50 h-16">
             {/* Logo */}
             <div className="flex-shrink-0">
-                <h1 className="text-2xl sm:text-3xl font-paypayan text-neutralDark">
+                <h1 className="text-2xl sm:text-3xl finger-paint-regular text-neutralDark">
                     Paypayan
                 </h1>
+
             </div>
 
 

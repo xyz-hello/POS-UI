@@ -1,6 +1,9 @@
+// filepath: src/components/products/ProductTable.js
 import React from "react";
 import { MdEdit, MdDelete } from "react-icons/md";
+import { Package } from "lucide-react";
 import IconButton from "../CommonComponents/IconButton";
+import EmptyState from "../CommonComponents/EmptyState";
 
 // Utility function to format price in PHP currency
 const formatPrice = (amount) => {
@@ -51,8 +54,12 @@ export default function ProductTable({ products = [], onEdit, onDelete, uploadsB
                 <tbody className="bg-white divide-y divide-gray-200">
                     {products.length === 0 ? (
                         <tr>
-                            <td colSpan={8} className="text-center text-gray-400 py-6">
-                                No products found.
+                            <td colSpan={8}>
+                                <EmptyState
+                                    icon={Package}
+                                    message="No products found"
+                                    size="default"
+                                />
                             </td>
                         </tr>
                     ) : (
@@ -89,7 +96,7 @@ export default function ProductTable({ products = [], onEdit, onDelete, uploadsB
                                             icon={MdEdit}
                                             title="Edit"
                                             onClick={() => onEdit(product)}
-                                            variant="edit"
+                                            variant="edit" x
                                         />
                                         <IconButton
                                             icon={MdDelete}

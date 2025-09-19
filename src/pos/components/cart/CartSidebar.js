@@ -9,7 +9,7 @@ import OrderSummaryModal from "../payment/OrderSummaryModal";
 import OrderSuccessModal from "../payment/OrderSuccessModal";
 import OrderFailedModal from "../payment/OrderFailedModal";
 import ConfirmationModal from "../../../components/CommonComponents/ConfirmationModal";
-import EmptyState from "../CommonComponents/EmptyState";
+import EmptyState from "../../../components/CommonComponents/EmptyState";
 import { formatPrice } from "../../utils/FormatPrice";
 import { createOrder } from "../../../services/orderApi";
 
