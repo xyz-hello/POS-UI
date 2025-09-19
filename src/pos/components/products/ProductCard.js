@@ -1,4 +1,4 @@
-// filepath: src/components/POS/ProductCard.js
+// src/components/POS/ProductCard.js
 import React, { useEffect, useRef, useState } from "react";
 import { useCart } from "../contexts/cartContext";
 import { formatProductPrice } from "../../utils/FormatPrice";
@@ -6,33 +6,30 @@ import POSProductImage from "./POSProductImage";
 import PriceBadge from "./PriceBadge";
 import QuantityControl from "./QuantityControl";
 
-export default function ProductCard({ product, onAddToCart }) {
-    const [selected, setSelected] = useState(false); // highlight when selected
+export default function ProductCard({
+    product,
+    quantity,            // new prop for mass edit
+    onQuantityChange,    // new prop for mass edit
+    massEditMode,        // toggle input
+    onAddToCart,
+    viewMode
+}) {
+    const [selected, setSelected] = useState(false);
     const cardRef = useRef(null);
-
     const { addToCart, removeFromCart, getItemQuantity, cart } = useCart();
 
-    // Quantity already in cart
-    const quantity = getItemQuantity(product.id);
-
-    // Remaining stock = total stock - quantity in cart
-    const remainingStock = product.stock - quantity;
-
-    // Out of stock condition (no items left to sell)
+    const currentCartQty = getItemQuantity(product.id);
+    const remainingStock = product.stock - currentCartQty;
     const isOutOfStock = remainingStock <= 0;
 
-    // Close selection when clicking outside the card
     useEffect(() => {
         const handleClickOutside = (event) => {
-            if (cardRef.current && !cardRef.current.contains(event.target)) {
-                setSelected(false);
-            }
+            if (cardRef.current && !cardRef.current.contains(event.target)) setSelected(false);
         };
         document.addEventListener("mousedown", handleClickOutside);
         return () => document.removeEventListener("mousedown", handleClickOutside);
     }, []);
 
-    // Increase quantity (add to cart)
     const handleIncrease = () => {
         if (!isOutOfStock) {
             addToCart(product);
@@ -41,20 +38,17 @@ export default function ProductCard({ product, onAddToCart }) {
         }
     };
 
-    // Decrease quantity (remove from cart)
     const handleDecrease = () => {
-        if (quantity > 0) {
+        if (currentCartQty > 0) {
             const cartItem = cart.find(item => item.productId === product.id);
-            if (cartItem) {
-                removeFromCart(cartItem.lineId); // remove one quantity
-            }
+            if (cartItem) removeFromCart(cartItem.lineId);
         }
     };
 
     return (
         <div
             ref={cardRef}
-            className={`p-3 rounded-xl border shadow-sm flex flex-col items-center transition-transform duration-200 
+            className={`p-3 rounded-xl border shadow-sm flex flex-col items-center transition-transform duration-200
                 ${selected && !isOutOfStock ? "ring-2 ring-brandGreen" : ""}
                 ${isOutOfStock
                     ? "bg-gray-100 border-gray-300 opacity-50 cursor-not-allowed"
@@ -62,36 +56,53 @@ export default function ProductCard({ product, onAddToCart }) {
                 }
             `}
         >
-            {/* Product Image + Price */}
+            {/* Image + Price */}
             <div className="relative w-full mb-3 bg-gray-50 rounded-lg p-2">
                 <POSProductImage imageUrl={product.image} name={product.name} />
                 <PriceBadge price={formatProductPrice(product)} />
             </div>
 
-            {/* Product Name */}
-            <h3 className="text-sm font-semibold text-center truncate w-full">
-                {product.name}
-            </h3>
-
-            {/* Product Description */}
+            {/* Name & description */}
+            <h3 className="text-sm font-semibold text-center truncate w-full">{product.name}</h3>
             {product.description && (
-                <p className="text-xs text-gray-500 text-center mt-1 line-clamp-2 w-full">
-                    {product.description}
-                </p>
+                <p className="text-xs text-gray-500 text-center mt-1 line-clamp-2 w-full">{product.description}</p>
             )}
 
-            {/* Show quantity controls only if in stock */}
-            {!isOutOfStock ? (
-                <QuantityControl
-                    quantity={quantity}
-                    onIncrease={handleIncrease}
-                    onDecrease={handleDecrease}
-                    maxStock={product.stock}
-                />
+            {/* Mass edit mode input */}
+            {massEditMode ? (
+                <div className="flex items-center space-x-2 mt-2">
+                    <button
+                        onClick={() => onQuantityChange(product.id, quantity - 1)}
+                        className="px-2 py-1 bg-gray-200 rounded"
+                    >
+                        -
+                    </button>
+                    <input
+                        type="number"
+                        className="w-16 text-center border rounded"
+                        value={quantity}
+                        onChange={(e) => onQuantityChange(product.id, Number(e.target.value))}
+                    />
+                    <button
+                        onClick={() => onQuantityChange(product.id, quantity + 1)}
+                        className="px-2 py-1 bg-gray-200 rounded"
+                    >
+                        +
+                    </button>
+                </div>
             ) : (
-                <span className="mt-3 text-xs font-medium text-red-500">
-                    Out of Stock
-                </span>
+                !isOutOfStock && (
+                    <QuantityControl
+                        quantity={currentCartQty}
+                        onIncrease={handleIncrease}
+                        onDecrease={handleDecrease}
+                        maxStock={product.stock}
+                    />
+                )
+            )}
+
+            {isOutOfStock && !massEditMode && (
+                <span className="mt-3 text-xs font-medium text-red-500">Out of Stock</span>
             )}
         </div>
     );

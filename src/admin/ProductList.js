@@ -11,17 +11,19 @@ import ProductTable from "../components/products/ProductTable";
 import ProductCard from "../components/products/ProductCard";
 import ViewToggle from "../components/CommonComponents/ViewToggle";
 import Pagination from "../components/CommonComponents/Pagination";
+import EmptyState from "../components/CommonComponents/EmptyState";
 import { showSuccessToast, showErrorToast } from "../utils/toast";
+import { Package } from "lucide-react";
 
 const ProductList = () => {
     // ---------------- State ----------------
-    const [products, setProducts] = useState([]); // all products from backend
-    const [searchTerm, setSearchTerm] = useState(""); // search query
-    const [currentPage, setCurrentPage] = useState(1); // current pagination page
-    const [loading, setLoading] = useState(false); // loading state
-    const [modal, setModal] = useState({ type: null, product: null, open: false }); // modal data
-    const [viewMode, setViewMode] = useState("table"); // toggle between "table" or "grid"
-    const productsPerPage = 5; // number of products per page
+    const [products, setProducts] = useState([]);
+    const [searchTerm, setSearchTerm] = useState("");
+    const [currentPage, setCurrentPage] = useState(1);
+    const [loading, setLoading] = useState(false);
+    const [modal, setModal] = useState({ type: null, product: null, open: false });
+    const [viewMode, setViewMode] = useState("table"); // "table" or "grid"
+    const productsPerPage = 5;
 
     const baseURL = "http://localhost:4000/api/admin/products";
     const uploadsBaseURL = "http://localhost:4000/uploads";
@@ -33,12 +35,12 @@ const ProductList = () => {
         return { Authorization: `Bearer ${token}` };
     };
 
-    // ---------------- Fetch Products from API ----------------
+    // ---------------- Fetch Products ----------------
     const loadProducts = useCallback(async () => {
         setLoading(true);
         try {
             const res = await axios.get(baseURL, { headers: getAuthHeaders() });
-            setProducts(res.data || []); // update state with fetched products
+            setProducts(res.data || []);
         } catch (err) {
             console.error(err);
             showErrorToast(err.response?.data?.message || "Failed to fetch products.");
@@ -47,7 +49,6 @@ const ProductList = () => {
         }
     }, []);
 
-    // Fetch products when component mounts
     useEffect(() => {
         loadProducts();
     }, [loadProducts]);
@@ -57,17 +58,13 @@ const ProductList = () => {
         p.name.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
-    const totalPages = Math.max(
-        Math.ceil(filteredProducts.length / productsPerPage),
-        1
-    );
+    const totalPages = Math.max(Math.ceil(filteredProducts.length / productsPerPage), 1);
 
     const currentProducts = filteredProducts.slice(
         (currentPage - 1) * productsPerPage,
         currentPage * productsPerPage
     );
 
-    // Reset to first page if current page exceeds available pages
     useEffect(() => {
         if (currentPage > totalPages) setCurrentPage(1);
     }, [filteredProducts, totalPages, currentPage]);
@@ -81,23 +78,13 @@ const ProductList = () => {
     const handleDeleteProduct = async () => {
         if (!modal.product) return;
         try {
-            // Call backend delete
-            await axios.delete(`${baseURL}/${modal.product.id}`, {
-                headers: getAuthHeaders(),
-            });
-
-            // Remove product from state immediately
-            setProducts((prev) =>
-                prev.filter((p) => p.id !== modal.product.id)
-            );
-
+            await axios.delete(`${baseURL}/${modal.product.id}`, { headers: getAuthHeaders() });
+            setProducts((prev) => prev.filter((p) => p.id !== modal.product.id));
             closeModal();
             showSuccessToast("Product deleted successfully.");
         } catch (err) {
             console.error(err);
-            showErrorToast(
-                err.response?.data?.message || "Failed to delete product."
-            );
+            showErrorToast(err.response?.data?.message || "Failed to delete product.");
         }
     };
 
@@ -107,50 +94,35 @@ const ProductList = () => {
         try {
             const res = isEdit
                 ? await axios.put(url, formData, {
-                    headers: {
-                        ...getAuthHeaders(),
-                        "Content-Type": "multipart/form-data",
-                    },
+                    headers: { ...getAuthHeaders(), "Content-Type": "multipart/form-data" },
                 })
                 : await axios.post(url, formData, {
-                    headers: {
-                        ...getAuthHeaders(),
-                        "Content-Type": "multipart/form-data",
-                    },
+                    headers: { ...getAuthHeaders(), "Content-Type": "multipart/form-data" },
                 });
 
-            showSuccessToast(
-                res.data.message || (isEdit ? "Product updated" : "Product added")
-            );
-
-            // Reload products after add/edit
+            showSuccessToast(res.data.message || (isEdit ? "Product updated" : "Product added"));
             loadProducts();
             closeModal();
         } catch (err) {
             console.error(err);
-            showErrorToast(
-                err.response?.data?.message ||
-                (isEdit ? "Failed to update" : "Failed to add")
-            );
+            showErrorToast(err.response?.data?.message || (isEdit ? "Failed to update" : "Failed to add"));
         }
     };
 
     // ---------------- Render ----------------
     return (
         <MainLayout>
-            {/* Search + Add Product Button */}
+            {/* Search + Add Button */}
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
                 <SearchInput
                     value={searchTerm}
                     onChange={(e) => {
                         setSearchTerm(e.target.value);
-                        setCurrentPage(1); // reset to first page when searching
+                        setCurrentPage(1);
                     }}
                     placeholder="Search by product name..."
                 />
-                <PrimaryButton onClick={() => openModal("add")}>
-                    + Add Product
-                </PrimaryButton>
+                <PrimaryButton onClick={() => openModal("add")}>+ Add Product</PrimaryButton>
             </div>
 
             {/* Header + View Toggle */}
@@ -158,13 +130,11 @@ const ProductList = () => {
                 <h2 className="text-2xl font-bold text-[#1F2937]">Products List</h2>
                 <ViewToggle
                     viewMode={viewMode}
-                    onToggle={() =>
-                        setViewMode(viewMode === "table" ? "grid" : "table")
-                    }
+                    onToggle={() => setViewMode(viewMode === "table" ? "grid" : "table")}
                 />
             </div>
 
-            {/* Product Display (table or grid) */}
+            {/* Product Display */}
             {loading ? (
                 <div>Loading...</div>
             ) : viewMode === "table" ? (
@@ -174,6 +144,10 @@ const ProductList = () => {
                     onDelete={(p) => openModal("delete", p)}
                     uploadsBaseURL={uploadsBaseURL}
                 />
+            ) : currentProducts.length === 0 ? (
+                <div className="flex flex-col justify-center items-center h-64">
+                    <EmptyState icon={Package} message="No products found" size="lg" />
+                </div>
             ) : (
                 <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
                     {currentProducts.map((p) => (
@@ -188,33 +162,15 @@ const ProductList = () => {
             )}
 
             {/* Pagination */}
-            <Pagination
-                currentPage={currentPage}
-                totalPages={totalPages}
-                onPageChange={setCurrentPage}
-            />
+            <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
 
-            {/* Add Product Modal */}
+            {/* Add / Edit / Delete Modals */}
             {modal.open && modal.type === "add" && (
-                <AddProductModal
-                    editData={null}
-                    onClose={closeModal}
-                    onSubmit={(data) => handleAddEditProduct(data)}
-                    isOpen
-                />
+                <AddProductModal editData={null} onClose={closeModal} onSubmit={handleAddEditProduct} isOpen />
             )}
-
-            {/* Edit Product Modal */}
             {modal.open && modal.type === "edit" && (
-                <AddProductModal
-                    editData={modal.product}
-                    onClose={closeModal}
-                    onSubmit={(data) => handleAddEditProduct(data, true)}
-                    isOpen
-                />
+                <AddProductModal editData={modal.product} onClose={closeModal} onSubmit={(data) => handleAddEditProduct(data, true)} isOpen />
             )}
-
-            {/* Delete Confirmation Modal */}
             {modal.open && modal.type === "delete" && (
                 <DeleteModal
                     isOpen

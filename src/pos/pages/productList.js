@@ -3,12 +3,12 @@ import React, { useState, useEffect, useMemo } from "react";
 import InfiniteScroll from "react-infinite-scroll-component";
 import { usePOSProducts } from "../../hooks/usePOSProducts";
 import ProductCard from "../components/products/ProductCard";
-import SearchBar from "../components/CommonComponents/SeachBar";
+import SearchBarWithToggle from "../components/CommonComponents/SeachBar";
 import EmptyState from "../../components/CommonComponents/EmptyState";
 import ErrorState from "../../components/CommonComponents/ErrorState";
 import { ShoppingCart, WifiOff } from "lucide-react";
 
-// Reusable skeleton loader for product cards
+// Skeleton loader
 const ProductSkeletonGrid = ({ count }) => (
     <div className="p-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
         {Array.from({ length: count }).map((_, idx) => (
@@ -35,10 +35,14 @@ export default function POSProductList() {
     const itemsPerLoad = 20;
     const [loadedCount, setLoadedCount] = useState(0);
 
+    const [viewMode, setViewMode] = useState("grid"); // "grid" or "list"
+    const [massEditMode, setMassEditMode] = useState(false); // toggle edit
+    const [massEditQuantities, setMassEditQuantities] = useState({}); // {productId: qty}
+
     // Filter products by search term
     const filteredProducts = useMemo(() => {
-        return products.filter((product) =>
-            product.name.toLowerCase().includes(searchTerm.toLowerCase())
+        return products.filter((p) =>
+            p.name.toLowerCase().includes(searchTerm.toLowerCase())
         );
     }, [products, searchTerm]);
 
@@ -47,10 +51,9 @@ export default function POSProductList() {
         const initialLoad = filteredProducts.slice(0, itemsPerLoad);
         setDisplayProducts(initialLoad);
         setLoadedCount(initialLoad.length);
-        setHasMore(initialLoad.length < filteredProducts.length); // stop if fewer items
+        setHasMore(initialLoad.length < filteredProducts.length);
     }, [filteredProducts]);
 
-    // Load more products for infinite scroll
     const loadMoreProducts = () => {
         const nextProducts = filteredProducts.slice(
             loadedCount,
@@ -58,41 +61,57 @@ export default function POSProductList() {
         );
         setDisplayProducts((prev) => [...prev, ...nextProducts]);
         setLoadedCount((prev) => prev + nextProducts.length);
-
-        // Stop loading if we've reached the end
         if (loadedCount + nextProducts.length >= filteredProducts.length) {
             setHasMore(false);
         }
     };
 
-    // Handle add-to-cart action
     const handleAddToCart = (product) => {
         console.log("Added to cart:", product.name);
     };
 
-    // Show skeleton loader while fetching
-    if (loading) {
-        return <ProductSkeletonGrid count={itemsPerLoad} />;
-    }
+    const handleToggleView = () => {
+        setViewMode((prev) => (prev === "grid" ? "list" : "grid"));
+    };
 
-    // Show error state if fetch failed
-    if (error) {
+    const handleToggleMassEdit = () => {
+        setMassEditMode((prev) => !prev);
+        if (!massEditMode) {
+            // Pre-fill quantities
+            const initialQuantities = {};
+            products.forEach((p) => {
+                initialQuantities[p.id] = 0;
+            });
+            setMassEditQuantities(initialQuantities);
+        }
+    };
+
+    const handleQuantityChange = (productId, value) => {
+        if (value < 0) value = 0;
+        setMassEditQuantities((prev) => ({ ...prev, [productId]: value }));
+    };
+
+    if (loading) return <ProductSkeletonGrid count={itemsPerLoad} />;
+
+    if (error)
         return (
             <ErrorState
                 icon={WifiOff}
                 message={error.message || "Failed to load products. Please check your connection."}
-                onRetry={fetchProducts} // retry using hook instead of reload
+                onRetry={fetchProducts}
             />
         );
-    }
 
     return (
         <div className="relative">
-            {/* Product search bar */}
-            <SearchBar
+            {/* Search + toggle + edit */}
+            <SearchBarWithToggle
                 value={searchTerm}
                 onChange={setSearchTerm}
                 placeholder="Search products..."
+                viewMode={viewMode}
+                onToggle={handleToggleView}
+                onEdit={handleToggleMassEdit}
             />
 
             <InfiniteScroll
@@ -101,21 +120,27 @@ export default function POSProductList() {
                 hasMore={hasMore}
                 loader={<ProductSkeletonGrid count={itemsPerLoad} />}
             >
-                {/* Product grid */}
-                <div className="p-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                {/* Product grid/list */}
+                <div
+                    className={`p-4 ${viewMode === "grid"
+                            ? "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4"
+                            : "flex flex-col gap-2"
+                        }`}
+                >
                     {displayProducts.length > 0 ? (
                         displayProducts.map((product) => (
                             <ProductCard
                                 key={product.id}
                                 product={product}
                                 onAddToCart={handleAddToCart}
+                                quantity={massEditQuantities[product.id] || 0}
+                                onQuantityChange={handleQuantityChange}
+                                massEditMode={massEditMode}
+                                viewMode={viewMode}
                             />
                         ))
                     ) : (
-                        <EmptyState
-                            icon={ShoppingCart}
-                            message="No products found"
-                        />
+                        <EmptyState icon={ShoppingCart} message="No products found" />
                     )}
                 </div>
             </InfiniteScroll>

@@ -7,15 +7,18 @@ import InventoryGrid from "../components/inventory/InventoryGrid";
 import SearchBar from "../components/CommonComponents/SearchInput";
 import ViewToggle from "../components/CommonComponents/ViewToggle";
 import Pagination from "../components/CommonComponents/Pagination";
+import EmptyState from "../components/CommonComponents/EmptyState";
 import { getInventory, updateInventory } from "../services/inventoryServices";
 import { showSuccessToast, showErrorToast } from "../utils/toast";
+import { Package } from "lucide-react";
 
 const InventoryPage = () => {
+    // ---------------- State ----------------
     const [inventories, setInventories] = useState([]);
     const [searchTerm, setSearchTerm] = useState("");
     const [currentPage, setCurrentPage] = useState(1);
     const [loading, setLoading] = useState(false);
-    const [viewMode, setViewMode] = useState("table"); // table or grid
+    const [viewMode, setViewMode] = useState("table"); // "table" or "grid"
     const inventoriesPerPage = 5;
     const token = localStorage.getItem("token");
 
@@ -37,7 +40,7 @@ const InventoryPage = () => {
         loadInventory();
     }, [loadInventory]);
 
-    // ---------------- Reusable Adjust Function ----------------
+    // ---------------- Adjust Inventory ----------------
     const handleAdjust = async (productId, change) => {
         if (!token) return showErrorToast("JWT token missing. Please login.");
         try {
@@ -54,21 +57,19 @@ const InventoryPage = () => {
     const filteredInventory = inventories.filter((inv) =>
         inv.product_name.toLowerCase().includes(searchTerm.toLowerCase())
     );
-    const totalPages = Math.max(
-        Math.ceil(filteredInventory.length / inventoriesPerPage),
-        1
-    );
+
+    const totalPages = Math.max(Math.ceil(filteredInventory.length / inventoriesPerPage), 1);
+
     const paginate = (items) =>
-        items.slice(
-            (currentPage - 1) * inventoriesPerPage,
-            currentPage * inventoriesPerPage
-        );
+        items.slice((currentPage - 1) * inventoriesPerPage, currentPage * inventoriesPerPage);
+
     const currentInventory = paginate(filteredInventory);
 
     useEffect(() => {
         if (currentPage > totalPages) setCurrentPage(1);
     }, [filteredInventory, currentPage, totalPages]);
 
+    // ---------------- Render ----------------
     return (
         <div className="flex h-screen bg-gray-50">
             <Sidebar />
@@ -89,14 +90,10 @@ const InventoryPage = () => {
 
                         {/* Header + View Toggle */}
                         <div className="flex items-center justify-between">
-                            <h2 className="text-2xl font-bold text-[#1F2937]">
-                                Inventory List
-                            </h2>
+                            <h2 className="text-2xl font-bold text-[#1F2937]">Inventory List</h2>
                             <ViewToggle
                                 viewMode={viewMode}
-                                onToggle={() =>
-                                    setViewMode(viewMode === "table" ? "grid" : "table")
-                                }
+                                onToggle={() => setViewMode(viewMode === "table" ? "grid" : "table")}
                             />
                         </div>
 
@@ -104,15 +101,13 @@ const InventoryPage = () => {
                         {loading ? (
                             <div>Loading...</div>
                         ) : viewMode === "table" ? (
-                            <InventoryTable
-                                inventories={currentInventory}
-                                onAdjust={handleAdjust}
-                            />
+                            <InventoryTable inventories={currentInventory} onAdjust={handleAdjust} />
+                        ) : currentInventory.length === 0 ? (
+                            <div className="flex flex-col justify-center items-center h-64">
+                                <EmptyState icon={Package} message="No inventory found" size="lg" />
+                            </div>
                         ) : (
-                            <InventoryGrid
-                                inventories={currentInventory}
-                                onAdjust={handleAdjust}
-                            />
+                            <InventoryGrid inventories={currentInventory} onAdjust={handleAdjust} />
                         )}
 
                         {/* Pagination */}
