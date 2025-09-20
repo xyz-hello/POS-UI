@@ -1,16 +1,9 @@
 // src/components/POS/payment/PaymentMethod.js
 import React from "react";
+import { PAYMENT_METHODS } from "../../../constant/paymentMethod";
 
 export default function PaymentMethod({ selectedMethod, onSelect }) {
-    // Define available payment methods
-    const methods = [
-        { key: "cash", label: "Cash" },
-        { key: "ewallet", label: "E-Wallet" },
-        { key: "scan", label: "Scan" },
-    ];
-
     return (
-        // Wrapper with rounded corners, border, padding, and stronger shadow
         <div className="bg-white rounded-2xl border border-gray-200 shadow-md p-5">
             {/* Section Label */}
             <h3 className="text-sm font-semibold text-gray-600 mb-3">
@@ -19,13 +12,13 @@ export default function PaymentMethod({ selectedMethod, onSelect }) {
 
             {/* Pills row */}
             <div className="flex gap-2">
-                {methods.map((method) => (
+                {PAYMENT_METHODS.map((method) => (
                     <button
                         key={method.key}
-                        onClick={() => onSelect(method.key)} // Trigger selection
+                        onClick={() => onSelect(method.key)}
                         className={`flex-1 py-2 rounded-lg font-medium border text-xs transition-colors
                             ${selectedMethod === method.key
-                                ? "bg-white text-brandGreen border-brandGreen shadow-sm" // Highlight when selected
+                                ? "bg-white text-brandGreen border-brandGreen shadow-sm"
                                 : "bg-gray-100 text-gray-700 border-gray-300 hover:bg-gray-200"
                             }
                         `}

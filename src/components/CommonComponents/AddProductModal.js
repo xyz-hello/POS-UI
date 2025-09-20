@@ -75,7 +75,7 @@ export default function AddProductModal({ isOpen, onClose, onSubmit, editData })
                     {preview && <img src={preview} alt="Preview" className="w-32 h-32 object-cover rounded mt-2 border" />}
                     <div className="flex justify-end gap-2 mt-4">
                         <button type="button" className="px-3 py-1 bg-gray-300 rounded hover:bg-gray-400" onClick={onClose}>Cancel</button>
-                        <button type="submit" className="px-3 py-1 bg-green-500 text-white rounded hover:bg-green-600">{editData ? "Update" : "Add"}</button>
+                        <button type="submit" className="px-3 py-1 bg-primaryNavy text-white rounded hover:bg-primaryHover">{editData ? "Update" : "Add"}</button>
                     </div>
                 </form>
             </div>

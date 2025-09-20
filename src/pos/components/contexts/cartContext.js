@@ -2,7 +2,7 @@
 // filepath: src/contexts/cartContext.js
 import React, { createContext, useContext, useState } from "react";
 import { toast, ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+// import "react-toastify/dist/ReactToastify.css";
 
 // Create context
 const CartContext = createContext();
@@ -47,7 +47,7 @@ export const CartProvider = ({ children }) => {
                     qty,
                 };
                 updatedCart.push(newItem);
-                toast.success(`${product.name} added to cart`);
+                // toast.success(`${product.name} added to cart`);
             }
 
             return updatedCart;
@@ -66,11 +66,11 @@ export const CartProvider = ({ children }) => {
             if (index === -1) return updatedCart;
 
             if (removeAll || updatedCart[index].qty <= 1) {
-                toast.error(`${updatedCart[index].name} removed from cart`);
+                // toast.error(`${updatedCart[index].name} removed from cart`);
                 updatedCart.splice(index, 1);
             } else {
                 updatedCart[index].qty -= 1;
-                toast.info(`${updatedCart[index].name} quantity decreased`);
+                // toast.info(`${updatedCart[index].name} quantity decreased`);
             }
 
             return updatedCart;

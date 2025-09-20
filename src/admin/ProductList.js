@@ -23,7 +23,7 @@ const ProductList = () => {
     const [loading, setLoading] = useState(false);
     const [modal, setModal] = useState({ type: null, product: null, open: false });
     const [viewMode, setViewMode] = useState("table"); // "table" or "grid"
-    const productsPerPage = 5;
+    const productsPerPage = 10;
 
     const baseURL = "http://localhost:4000/api/admin/products";
     const uploadsBaseURL = "http://localhost:4000/uploads";
@@ -59,6 +59,8 @@ const ProductList = () => {
     );
 
     const totalPages = Math.max(Math.ceil(filteredProducts.length / productsPerPage), 1);
+    console.log("Products:", filteredProducts.length, "Per page:", productsPerPage, "Total pages:", totalPages);
+
 
     const currentProducts = filteredProducts.slice(
         (currentPage - 1) * productsPerPage,
@@ -68,6 +70,7 @@ const ProductList = () => {
     useEffect(() => {
         if (currentPage > totalPages) setCurrentPage(1);
     }, [filteredProducts, totalPages, currentPage]);
+
 
     // ---------------- Modal Helpers ----------------
     const openModal = (type, product = null) =>
@@ -162,7 +165,22 @@ const ProductList = () => {
             )}
 
             {/* Pagination */}
-            <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
+            <div className="flex flex-col items-center gap-2">
+                <Pagination
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    onPageChange={setCurrentPage}
+                />
+                <p className="text-sm text-gray-600">
+                    Showing{" "}
+                    {filteredProducts.length === 0
+                        ? 0
+                        : (currentPage - 1) * productsPerPage + 1}{" "}
+                    –{" "}
+                    {Math.min(currentPage * productsPerPage, filteredProducts.length)}{" "}
+                    of {filteredProducts.length} items | Page {currentPage} of {totalPages}
+                </p>
+            </div>
 
             {/* Add / Edit / Delete Modals */}
             {modal.open && modal.type === "add" && (

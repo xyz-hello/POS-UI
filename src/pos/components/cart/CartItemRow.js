@@ -1,16 +1,26 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Pencil, Trash2 } from "lucide-react";
 
-// Single row in the cart sidebar, memoized to avoid unnecessary re-renders
-function CartItemRow({ item, onEdit, onDelete, formatPrice }) {
+function CartItemRow({ item, onEdit, onDelete, formatPrice, highlightKey }) {
+    const [highlight, setHighlight] = useState(false);
+
+    useEffect(() => {
+        // If this row matches the highlightKey, animate
+        if (highlightKey === (item.lineId || item.id)) {
+            setHighlight(true);
+            const timer = setTimeout(() => setHighlight(false), 800); // highlight duration
+            return () => clearTimeout(timer);
+        }
+    }, [highlightKey, item.lineId, item.id]);
+
     return (
-        <div className="flex justify-between items-center py-1.5 border-b border-neutralBorder last:border-none">
-            {/* Item info */}
+        <div
+            className={`flex justify-between items-center py-1.5 border-b border-neutralBorder last:border-none transition-colors duration-500
+                ${highlight ? "bg-green-100" : "bg-white"}`}
+        >
             <p className="text-sm text-neutralDark truncate">
                 {item.qty}× {item.name}
             </p>
-
-            {/* Price + actions */}
             <div className="flex items-center space-x-1">
                 <p className="text-sm font-semibold text-neutralDark">
                     {formatPrice(item.price * item.qty)}
@@ -34,5 +44,7 @@ function CartItemRow({ item, onEdit, onDelete, formatPrice }) {
     );
 }
 
-// Only re-render if the item changes
-export default React.memo(CartItemRow, (prev, next) => prev.item === next.item);
+export default React.memo(
+    CartItemRow,
+    (prev, next) => prev.item === next.item && prev.highlightKey === next.highlightKey
+);

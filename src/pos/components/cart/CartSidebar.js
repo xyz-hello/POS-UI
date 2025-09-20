@@ -1,3 +1,4 @@
+// src/components/POS/cart/CartSidebar.js
 import React, { useState, useMemo, useCallback } from "react";
 import { useCart } from "../contexts/cartContext";
 import { ShoppingCart } from "lucide-react";
@@ -14,28 +15,53 @@ import { formatPrice } from "../../utils/FormatPrice";
 import { createOrder } from "../../../services/orderApi";
 
 export default function CartSidebar() {
-    const { cart, removeFromCart, clearCart } = useCart();
+    const { cart, addToCart, removeFromCart, clearCart } = useCart();
+
+    // Edit / Delete modals
     const [editItem, setEditItem] = useState(null);
     const [deleteItem, setDeleteItem] = useState(null);
 
-    // Modals
+    // Order modals
     const [isOrderSummaryOpen, setIsOrderSummaryOpen] = useState(false);
     const [isOrderSuccessOpen, setIsOrderSuccessOpen] = useState(false);
     const [isPaymentErrorOpen, setIsPaymentErrorOpen] = useState(false);
 
+    // Pending payment for OrderSummaryModal
     const [pendingPayment, setPendingPayment] = useState(null);
-    const [paymentResult, setPaymentResult] = useState(null);
 
-    // Calculate totals
+    // Last confirmed order (for displaying order number)
+    const [lastConfirmedOrder, setLastConfirmedOrder] = useState(null);
+
+    // Row highlight key (last added/updated item)
+    const [lastAddedItem, setLastAddedItem] = useState(null);
+
+    // Cart badge bump animation
+    const [cartCountHighlight, setCartCountHighlight] = useState(false);
+
+    // Totals
     const subtotal = useMemo(() => cart.reduce((sum, item) => sum + item.price * item.qty, 0), [cart]);
-    const total = subtotal; // removed discount
+    const total = subtotal; // no discount here
 
-    // Handlers wrapped in useCallback to prevent unnecessary re-renders
+    // Animate cart badge
+    const bumpCartCount = useCallback(() => {
+        setCartCountHighlight(true);
+        setTimeout(() => setCartCountHighlight(false), 300);
+    }, []);
+
+    // Add product to cart (immediate update + animations)
+    const handleAddToCart = useCallback((product, qty = 1) => {
+        addToCart(product, qty);      // update cartContext
+        setLastAddedItem(product.id); // trigger row highlight
+        bumpCartCount();              // animate badge
+    }, [addToCart, bumpCartCount]);
+
+    // Open OrderSummaryModal
     const handlePlaceOrder = useCallback(({ paymentMethod, amountPaid }) => {
-        setPendingPayment({ cart, subtotal, total, paymentMethod, amountPaid });
+        setPendingPayment({ cart, subtotal, total, paymentMethod, cashReceived: amountPaid });
         setIsOrderSummaryOpen(true);
     }, [cart, subtotal, total]);
 
+    // Confirm order API
     const confirmOrder = useCallback(async () => {
         try {
             const user = JSON.parse(localStorage.getItem("user"));
@@ -47,7 +73,12 @@ export default function CartSidebar() {
                 price: item.price,
             }));
 
-            const orderData = { user_id: user.id, cart: mappedCart, payment_method: pendingPayment.paymentMethod };
+            const orderData = {
+                user_id: user.id,
+                cart: mappedCart,
+                payment_method: pendingPayment.paymentMethod
+            };
+
             const response = await createOrder(orderData);
 
             const fullOrder = {
@@ -61,12 +92,16 @@ export default function CartSidebar() {
                 subtotal: pendingPayment.subtotal,
                 total: pendingPayment.total,
                 payment_method: pendingPayment.paymentMethod,
+                cashReceived: pendingPayment.cashReceived
             };
 
-            setPaymentResult(fullOrder);
+            setLastConfirmedOrder(fullOrder); // display order number
             clearCart();
             setIsOrderSummaryOpen(false);
             setIsOrderSuccessOpen(true);
+            setPendingPayment(null);
+            setLastAddedItem(null); // reset row highlight
+
         } catch (error) {
             console.error("Order API error:", error);
             setIsOrderSummaryOpen(false);
@@ -76,20 +111,37 @@ export default function CartSidebar() {
 
     return (
         <>
+            {/* Sidebar */}
             <aside className="w-72 bg-neutralCard rounded-xl shadow-md flex flex-col h-full mt-4 overflow-hidden">
                 {/* Header */}
-                <div className="px-4 py-2 border-b border-neutralBorder flex-shrink-0">
-                    <h2 className="text-lg font-semibold text-neutralDark">
-                        {cart.length === 0 ? "No pending order" : paymentResult ? `Order #${paymentResult.order_number}` : "Pending Order"}
-                    </h2>
-                    <p className="text-xs text-neutralGray mt-0.5 uppercase tracking-wide">Ordered Items</p>
+                <div className="px-4 py-2 border-b border-neutralBorder flex-shrink-0 flex justify-between items-center">
+                    <div>
+                        <h2 className="text-lg font-semibold text-neutralDark">
+                            {cart.length > 0
+                                ? "Pending Order"
+                                : lastConfirmedOrder
+                                    ? `Order #${lastConfirmedOrder.order_number}`
+                                    : "No Pending Order"}
+                        </h2>
+                        <p className="text-xs text-neutralGray mt-0.5 uppercase tracking-wide">
+                            Ordered Items
+                        </p>
+                    </div>
+                    {/* Cart icon with badge */}
+                    <div className="relative">
+                        <ShoppingCart size={24} />
+                        {cart.length > 0 && (
+                            <span className={`absolute -top-2 -right-2 bg-brandGreen text-white text-xs font-bold rounded-full px-2 py-0.5 transition-transform
+                                ${cartCountHighlight ? "scale-125" : "scale-100"}`}>
+                                {cart.reduce((sum, i) => sum + i.qty, 0)}
+                            </span>
+                        )}
+                    </div>
                 </div>
 
                 {/* Cart Items */}
                 <div className="flex-1 overflow-y-auto px-4 py-2 space-y-1">
-                    {cart.length === 0 ? (
-                        <EmptyState icon={ShoppingCart} message="Cart is empty" />
-                    ) : (
+                    {cart.length > 0 ? (
                         cart.map(item => (
                             <CartItemRow
                                 key={item.lineId || item.id}
@@ -97,17 +149,20 @@ export default function CartSidebar() {
                                 formatPrice={formatPrice}
                                 onEdit={() => setEditItem(item)}
                                 onDelete={() => setDeleteItem(item)}
+                                highlightKey={lastAddedItem} // animate new/updated row
                             />
                         ))
+                    ) : (
+                        <EmptyState icon={ShoppingCart} message="Cart is empty" />
                     )}
                 </div>
 
-                {/* Total */}
+                {/* Totals */}
                 <div className="flex-shrink-0 border-t border-neutralBorder bg-neutralCard px-4 py-3 rounded-b-xl">
                     <PaymentSummary subtotal={subtotal} total={total} />
                 </div>
 
-                {/* Edit/Delete Modals */}
+                {/* Edit / Delete Modals */}
                 {editItem && <EditCartItemModal item={editItem} onClose={() => setEditItem(null)} autoFocus={false} />}
                 {deleteItem && (
                     <ConfirmationModal
@@ -133,11 +188,11 @@ export default function CartSidebar() {
                 )}
 
                 {/* Success / Error Modals */}
-                {isOrderSuccessOpen && paymentResult && (
+                {isOrderSuccessOpen && lastConfirmedOrder && (
                     <OrderSuccessModal
                         isOpen={isOrderSuccessOpen}
                         onClose={() => setIsOrderSuccessOpen(false)}
-                        orderNumber={paymentResult.order_number}
+                        orderNumber={lastConfirmedOrder.order_number}
                     />
                 )}
                 {isPaymentErrorOpen && (

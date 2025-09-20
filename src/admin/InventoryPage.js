@@ -13,16 +13,16 @@ import { showSuccessToast, showErrorToast } from "../utils/toast";
 import { Package } from "lucide-react";
 
 const InventoryPage = () => {
-    // ---------------- State ----------------
     const [inventories, setInventories] = useState([]);
     const [searchTerm, setSearchTerm] = useState("");
     const [currentPage, setCurrentPage] = useState(1);
     const [loading, setLoading] = useState(false);
-    const [viewMode, setViewMode] = useState("table"); // "table" or "grid"
-    const inventoriesPerPage = 5;
+    const [viewMode, setViewMode] = useState("table"); // table or grid
+    const inventoriesPerPage = 10;
     const token = localStorage.getItem("token");
+    const uploadsBaseURL = "http://localhost:4000/uploads"; // match ProductList
 
-    // ---------------- Fetch Inventory ----------------
+    // Fetch inventory
     const loadInventory = useCallback(async () => {
         setLoading(true);
         try {
@@ -36,11 +36,9 @@ const InventoryPage = () => {
         }
     }, [token]);
 
-    useEffect(() => {
-        loadInventory();
-    }, [loadInventory]);
+    useEffect(() => { loadInventory(); }, [loadInventory]);
 
-    // ---------------- Adjust Inventory ----------------
+    // Adjust inventory
     const handleAdjust = async (productId, change) => {
         if (!token) return showErrorToast("JWT token missing. Please login.");
         try {
@@ -53,42 +51,33 @@ const InventoryPage = () => {
         }
     };
 
-    // ---------------- Filter & Pagination ----------------
+    // Filter & paginate
     const filteredInventory = inventories.filter((inv) =>
         inv.product_name.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
     const totalPages = Math.max(Math.ceil(filteredInventory.length / inventoriesPerPage), 1);
 
-    const paginate = (items) =>
-        items.slice((currentPage - 1) * inventoriesPerPage, currentPage * inventoriesPerPage);
+    const currentInventory = filteredInventory.slice(
+        (currentPage - 1) * inventoriesPerPage,
+        currentPage * inventoriesPerPage
+    );
 
-    const currentInventory = paginate(filteredInventory);
+    useEffect(() => { if (currentPage > totalPages) setCurrentPage(1); }, [filteredInventory, totalPages, currentPage]);
 
-    useEffect(() => {
-        if (currentPage > totalPages) setCurrentPage(1);
-    }, [filteredInventory, currentPage, totalPages]);
-
-    // ---------------- Render ----------------
     return (
-        <div className="flex h-screen bg-gray-50">
-            <Sidebar />
-            <div className="flex-1 flex flex-col">
+        <div className="flex h-screen bg-gray-50 overflow-hidden">
+            <aside className="w-64 h-screen flex-shrink-0 bg-white shadow overflow-y-auto"><Sidebar /></aside>
+            <div className="flex-1 flex flex-col h-screen overflow-hidden">
                 <Header />
-                <main className="flex-1 px-6 py-8 bg-gray-50">
+                <main className="flex-1 px-6 py-8 bg-gray-50 overflow-y-auto">
                     <div className="flex flex-col gap-6">
-                        {/* Search Input */}
                         <SearchBar
                             placeholder="Search by product name..."
                             value={searchTerm}
-                            onChange={(val) => {
-                                setSearchTerm(val);
-                                setCurrentPage(1);
-                            }}
+                            onChange={(val) => { setSearchTerm(val); setCurrentPage(1); }}
                             disabled={loading}
                         />
-
-                        {/* Header + View Toggle */}
                         <div className="flex items-center justify-between">
                             <h2 className="text-2xl font-bold text-[#1F2937]">Inventory List</h2>
                             <ViewToggle
@@ -97,26 +86,41 @@ const InventoryPage = () => {
                             />
                         </div>
 
-                        {/* Inventory Display */}
                         {loading ? (
                             <div>Loading...</div>
                         ) : viewMode === "table" ? (
-                            <InventoryTable inventories={currentInventory} onAdjust={handleAdjust} />
+                            <InventoryTable
+                                inventories={currentInventory}
+                                onAdjust={handleAdjust}
+                                uploadsBaseURL={uploadsBaseURL}
+                            />
                         ) : currentInventory.length === 0 ? (
                             <div className="flex flex-col justify-center items-center h-64">
                                 <EmptyState icon={Package} message="No inventory found" size="lg" />
                             </div>
                         ) : (
-                            <InventoryGrid inventories={currentInventory} onAdjust={handleAdjust} />
+                            <InventoryGrid
+                                inventories={currentInventory}
+                                onAdjust={handleAdjust}
+                                uploadsBaseURL={uploadsBaseURL}
+                            />
                         )}
 
-                        {/* Pagination */}
-                        <div className="flex justify-center">
+                        <div className="flex flex-col items-center gap-2">
                             <Pagination
                                 currentPage={currentPage}
                                 totalPages={totalPages}
                                 onPageChange={setCurrentPage}
                             />
+                            <p className="text-sm text-gray-600">
+                                Showing{" "}
+                                {filteredInventory.length === 0
+                                    ? 0
+                                    : (currentPage - 1) * inventoriesPerPage + 1}{" "}
+                                –{" "}
+                                {Math.min(currentPage * inventoriesPerPage, filteredInventory.length)}{" "}
+                                of {filteredInventory.length} items | Page {currentPage} of {totalPages}
+                            </p>
                         </div>
                     </div>
                 </main>
